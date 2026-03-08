@@ -10,12 +10,12 @@ const {
 } = require("firebase/auth");
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDOBEouVE2e4h6f5sL1kN-4Wg943e9O4bs",
-    authDomain: "reading-tracker-ead2b.firebaseapp.com",
-    projectId: "reading-tracker-ead2b",
-    storageBucket: "reading-tracker-ead2b.firebasestorage.app",
-    messagingSenderId: "382447219386",
-    appId: "1:382447219386:web:30b6c3de2b41f8dad9c883",
+    apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
