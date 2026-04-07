@@ -11,9 +11,11 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
+    <ThemeProvider value={DefaultTheme}>
+      <Stack screenOptions={{ headerShown: false, animation: "slide_from_left" }}>
         <Stack.Screen name="index" />
+        <Stack.Screen name="auth-test" />
+        <Stack.Screen name="deskscreen" />
         <Stack.Screen name="modal" options={{ presentation: "modal", title: "Modal" }} />
       </Stack>
       <StatusBar style="auto" />

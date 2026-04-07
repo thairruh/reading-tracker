@@ -7,6 +7,9 @@ import {
     Keyboard,
     Button,
     } from "react-native";
+import { auth } from "@/src/firebase/config";
+import { createJournalEntry } from "@/src/firebase/journal";
+import { Alert } from "react-native";
 
     type JournalEntryPageProps = {
     selectedDate: Date | null;
@@ -40,6 +43,47 @@ import {
         const day = String(date.getDate()).padStart(2, "0");
         const year = String(date.getFullYear()).slice(-2);
         return `${month}/${day}/${year}`;
+    }
+
+    async function handleSave() {
+        const user = auth.currentUser;
+
+        if (!user) {
+            Alert.alert("Error", "You must be logged in.");
+            return;
+        }
+
+        if (!book.trim()) {
+            Alert.alert("Missing info", "Please select or enter a book.");
+            return;
+        }
+
+        if (!notes.trim()) {
+            Alert.alert("Missing info", "Please write something in your notes.");
+            return;
+        }
+
+        try {
+            await createJournalEntry({
+            userId: user.uid,
+            book,
+            pagesRead: Number(pagesRead) || 0,
+            date: selectedDate
+                ? selectedDate.toISOString()
+                : new Date().toISOString(),
+            isPrivate,
+            notes,
+            });
+
+            Alert.alert("Success", "Entry saved!");
+
+            // optional reset
+            setNotes("");
+            setPagesRead("");
+            setBook("");
+        } catch (error: any) {
+            Alert.alert("Error", error.message ?? "Failed to save entry");
+        }
     }
 
     return (
@@ -181,7 +225,7 @@ import {
         </View>
 
         <View className="mt-3 items-center">
-        <Pressable className="rounded-[14px] border border-[#70925a] bg-[#cfe0b7] px-8 py-3">
+        <Pressable onPress={handleSave} className="rounded-[14px] border border-[#70925a] bg-[#cfe0b7] px-8 py-3">
             <Text className="text-[18px] font-semibold text-[#4d362b]">
             Save Entry
             </Text>

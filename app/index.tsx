@@ -1,34 +1,33 @@
-import { useState, useEffect } from "react";
-import { View, Text, Pressable } from "react-native";
-import JournalModal from "../components/JournalModal";
-import { useNavigation } from "expo-router";
+import { useEffect, useState } from "react";
+import { Redirect } from "expo-router";
+import { Text, View } from "react-native";
+import { User } from "firebase/auth";
+import { subscribeToAuth } from "@/src/firebase/auth";
 
-export default function HomeScreen() {
-  const [journalOpen, setJournalOpen] = useState(false);
-
-  const navigation = useNavigation<any>();
+export default function Index() {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    navigation.setOptions({
-      tabBarStyle: journalOpen ? { display: "none" } : undefined,
+    const unsubscribe = subscribeToAuth((user) => {
+      setCurrentUser(user);
+      setLoading(false);
     });
-  }, [journalOpen]);
 
-  return (
-    <View className="flex-1 items-center justify-center bg-[#f8e8d8]">
-      <Text className="mb-4 text-2xl font-bold">Desk Screen</Text>
+    return unsubscribe;
+  }, []);
 
-      <Pressable
-        onPress={() => setJournalOpen(true)}
-        className="rounded-2xl bg-[#b57edc] px-6 py-4"
-      >
-        <Text className="text-lg font-semibold text-white">Open Journal</Text>
-      </Pressable>
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <Text className="text-base text-black">Loading...</Text>
+      </View>
+    );
+  }
 
-      <JournalModal
-        visible={journalOpen}
-        onClose={() => setJournalOpen(false)}
-      />
-    </View>
-  );
+  if (currentUser) {
+    return <Redirect href="/deskscreen" />;
+  }
+
+  return <Redirect href="/auth-test" />;
 }

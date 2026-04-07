@@ -6,9 +6,11 @@ import {
     User,
 } from "firebase/auth";
 import { auth } from "./config";
+import { createUserDocument } from "./users";
 
 export async function register(email: string, password: string) {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await createUserDocument(cred.user);
     return cred.user;
 }
 
