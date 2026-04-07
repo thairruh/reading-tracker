@@ -6,13 +6,13 @@ import { Drawer } from 'react-native-drawer-layout';
 type SidebarProps = {
     children: React.ReactNode;
     username?: string;
-    photoURL?: ImageSourcePropType;
+    photoURL?: string;
     currentStreak?: number;
     gems?: number;
 }
 
 
-export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems, username, photoURL='https://i.pinimg.com/736x/6b/dd/fe/6bddfec0835965667c9d73ce7b7ba9a9.jpg' }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems, username, photoURL }) => {
     const router = useRouter();
     const navigation = useNavigation();
     const [open, setOpen] = React.useState(false); 
@@ -38,7 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
         {/* Profile picture & username display */}
         <View className="absolute top-32 right-28">
             <Image source={pfpSource} className="w-40 h-40 rounded-full"/>
-            <Text className="mt-4 text-xl text-brown text-center">{username ? username : '@Username'}</Text>
+            <Text className="mt-4 text-xl text-brown text-center">{username ? '@'+username : '@Username'}</Text>
         </View>
 
         {/* currentStreak display */}
@@ -64,7 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
         <View className="p-4 gap-4 absolute">
             
             {/* Profile */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.navigate('/Bulletin')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/Bulletin')} >
                 <Image 
                     source={require('../figma-icons/profile.png')}
                     className="w-12 h-12"
@@ -72,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
                 <Text className="left-5 font-bold text-2xl text-brown">Profile</Text>
             </TouchableOpacity>
             {/* Settings */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.navigate('/Bulletin')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/Bulletin')} >
                 <Image 
                     source={require('../figma-icons/settings.png')}
                     className="w-12 h-12"
@@ -81,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
             </TouchableOpacity>
 
             {/* Friends */}
-            <TouchableOpacity className="top-[390px] left-2 flex-row items-center" onPress={() => router.navigate('/Bulletin')} >
+            <TouchableOpacity className="top-[390px] left-2 flex-row items-center" onPress={() => router.replace('/Bulletin')} >
                 <Image 
                     source={require('../figma-icons/group_add.png')}
                     className="w-12 h-12"
@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
             </TouchableOpacity>  
 
             {/* Leaderboard */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.navigate('/Bulletin')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/Bulletin')} >
                 <Image 
                     source={require('../figma-icons/leaderboard.png')}
                     className="w-12 h-12"
@@ -99,7 +99,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
             </TouchableOpacity>
 
             {/* Notifications */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.navigate('/Bulletin')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/Bulletin')} >
                 <Image 
                     source={require('../figma-icons/notifications.png')}
                     className="w-12 h-12"

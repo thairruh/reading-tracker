@@ -5,7 +5,7 @@ import { Sidebar } from './Sidebar';
 
 export default function IndexScreen() {
   return (
-    <Sidebar>
+  
     <View className="flex-1 items-center justify-center">
       <NavButton 
       text="Go to Desk" 
@@ -14,7 +14,6 @@ export default function IndexScreen() {
       />
     </View>
 
-  </Sidebar>
   );
 }
 
