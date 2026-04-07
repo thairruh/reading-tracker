@@ -1,22 +1,22 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import FavoriteButton from './favorite-btn';
 
-const ShopItem = ({ name, price, image, favorited, onToggleFavorite }) => {
+const ShopItem = ({ name, price, image, favorited, onToggleFavorite, onPress }) => {
   return (
-    <View style={styles.container}>
+    <Pressable style={styles.container} onPress={onPress}>
 
-        <View style={{ alignItems: 'center' }}>
-            <View style={styles.box}>
-                <FavoriteButton favorited={favorited} onPress={onToggleFavorite}/>
-                <Image source={image} style={styles.wrapper} className="w-full h-full" resizeMode="contain"/>
-            </View>
+      <View style={{ alignItems: 'center' }}>
+          <View style={styles.box}>
+              <FavoriteButton favorited={favorited} onPress={onToggleFavorite}/>
+              <Image source={image} style={styles.wrapper} className="w-full h-full" resizeMode="contain"/>
+          </View>
             
-            <Text className="mt-1">{name}</Text>
-            <Text>{price}</Text>
+          <Text className="mt-1">{name}</Text>
+          <Text>{price}</Text>
         </View>
 
-    </View>
+    </Pressable>
   );
 };
 

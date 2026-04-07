@@ -1,4 +1,5 @@
 import ShopItem from '@/components/shop-item';
+import ShopItemInfo from '@/components/shop-item-info';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import miniPC from '../assets/images/desk/Blue-desk-mini-comp.png';
@@ -30,7 +31,15 @@ const DeskShop = () => {
                     : item
             )
         );
+
+        setSelectedItem(prev =>
+            prev && prev.id === id
+            ? { ...prev, favorited: !prev.favorited }
+            : prev
+        );
     };
+
+    const [selectedItem, setSelectedItem] = useState(null);
 
   return (
     <View style={styles.container}>
@@ -39,6 +48,7 @@ const DeskShop = () => {
 
         
         <View style={styles.wrapper}>
+        {!selectedItem && (
             <Tabs
             tabs={[
                 { label: 'Desk', color: '#FFB6B6' },
@@ -47,16 +57,29 @@ const DeskShop = () => {
             ]}
             onTabPress={(label) => setActiveTab(label)}
             />
+        )}
 
             <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.bgBox}>
+                
+                {selectedItem ? (
+                    
+                    <ShopItemInfo
+                        selectedItem={selectedItem}
+                        onClose={() => setSelectedItem(null)}
+                        onToggleFavorite={() => toggleFavorite(selectedItem.id)}
+                    />
+                ) : (
+
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap'}}>
                     {filteredItems.map(item => (
                         <ShopItem 
                             key={item.id}
                             {...item} 
-                            onToggleFavorite={() => toggleFavorite(item.id)}/>
+                            onToggleFavorite={() => toggleFavorite(item.id)}
+                            onPress={() => setSelectedItem(item)}/>
                     ))}
                 </View>
+                )}
             </ScrollView>
         </View>
     </View>

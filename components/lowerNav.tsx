@@ -6,17 +6,10 @@ import shopBtn from '../assets/images/shop_btn.png';
 
 const LowerNav = () => {
   return (
-    <View style={styles.container}>
 
-      <View style={{ position: 'absolute',right: -30,bottom: -20,}}>
-        <Link href="/" asChild>
-          <Pressable style={styles.outerCircle}>
-            <View style={styles.innerCircle}>
-              <Text className="text-lg mr-2">Redecorate</Text>
-            </View>
-          </Pressable>
-        </Link>
-      </View>
+    /* REDECORATE AND SHOP BUTTONS*/
+
+    <View style={styles.container}>
 
       <View style={{ position: 'absolute',right: 20,bottom: 0,}}>
         <Link href="/shop" asChild>
@@ -27,6 +20,18 @@ const LowerNav = () => {
           </Pressable>
         </Link>
       </View>
+
+
+      <View style={{ position: 'absolute',right: -30,bottom: -20,}}>
+        <Link href="/" asChild>
+          <Pressable style={styles.outerCircle}>
+            <View style={styles.innerCircle}>
+              <Text className="text-lg mr-2">Redecorate</Text>
+            </View>
+          </Pressable>
+        </Link>
+      </View>
+      
     </View>
   );
 };

@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
+import { Link } from 'expo-router';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import bookshelf from '../assets/images/bedroom/BR-bookshelf-plain.png';
 import bed from '../assets/images/bedroom/Br-checker-bed-pink.png';
 import floor from '../assets/images/bedroom/BR-floor-wood-light.png';
@@ -18,7 +19,20 @@ const Bedroom = () => {
 
     <Image source={floor} style={styles.floor} contentFit="contain"/>
     <Image source={bed} style={styles.bed} contentFit="contain"/>
-    <Image source={bookshelf} style={styles.bookshelf} contentFit="contain"/>
+    
+    <View 
+      style={{
+      position: 'absolute',
+      top: 290,
+      left: 150,
+      zIndex: 1,
+      }}>
+      <Link href="./library" asChild>
+        <Pressable>
+          <Image source={bookshelf} style={styles.bookshelf}/>
+        </Pressable>
+      </Link>
+    </View>
 
     <LowerNav/>
     </View>
@@ -61,11 +75,9 @@ const styles = StyleSheet.create({
     zIndex: 1
   },
   bookshelf: {
-    width: '70%',
-    height: '40%',
-    position: 'absolute',
-    top: 265,
-    left: 70
+    width: 137,
+    height: 252,
+    
   },
 });
 

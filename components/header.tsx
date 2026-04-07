@@ -2,7 +2,9 @@ import { ImageBackground } from 'expo-image';
 import { Link, useNavigation } from 'expo-router';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Banner from '../assets/images/header.png';
+import menuIcon from '../assets/images/menu.svg';
 import profile from '../assets/images/profileIcon.png';
+import Gems from './gems';
 
 export default function CustomHeader() {
   const navigation = useNavigation();
@@ -39,6 +41,13 @@ export default function CustomHeader() {
           </Pressable>
         </Link>
       </View>
+      
+      <View style={{ flexDirection: 'row', position: 'absolute', right: 0}}>
+        <Gems/>
+        <Image source={menuIcon}/>
+      </View>
+      
+      
 
     </View>
   );
