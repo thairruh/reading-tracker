@@ -22,7 +22,7 @@ export default function DeskScreen() {
         </View>
 
         {/* Desk */}
-        <View className="absolute bottom-0 w-full h-80 bg-pink border-10 border-desk-shading/50 z-0" />
+        <View className="absolute bottom-0 w-full h-80 bg-pink border-t-2 border-desk-shading/50" />
         {/* Under desk shading */}
         <View className="absolute bottom-0 w-full h-32 bg-desk-shading z-0" />
         {/* Underdesk */}
@@ -35,6 +35,24 @@ export default function DeskScreen() {
         style={{ top: -40, height: 200 }}
         resizeMode='contain'
         />
+
+        {/* Star Box */}
+            <View className="absolute top-14 left-48">
+                <Image
+                source={require('../figma-icons/star_Box.png')}
+                className="w-20"
+                resizeMode='contain'
+                />
+            </View>
+
+        {/* Gem Box */}
+            <View className="absolute top-[45px] right-20">
+                <Image
+                source={require('../figma-icons/gem_Box.png')}
+                className="w-[82px]"
+                resizeMode='contain'
+                />
+            </View> 
 
         {/* Journal on desk */}
         <View className="absolute bottom-12">
@@ -51,7 +69,7 @@ export default function DeskScreen() {
 
         {/* Navigation Buttons */}
         { /* 'Profile' Button */ }
-        <View className="absolute top-8 left-[95px] w-24 h-24 items-center justify-center">
+        <View className="absolute top-6 left-[85px] w-24 h-24 items-center justify-center">
             <NavButton 
             text="Profile" 
             screenName="/"  //file name linking to profile screen
@@ -62,10 +80,10 @@ export default function DeskScreen() {
         </View>
 
         { /* 'Change Area' Button */ }
-        <View className="absolute top-6 -left-10 items-start">
+        <View className="absolute top-6 -left-12 items-start">
             <NavButton 
             text="Change Area" 
-            screenName="/"  //file name linking to change area screen
+            screenName=""  //file name linking to change area screen
             btnStyle="bg-peach w-48 h-48 rounded-full"
             textStyle="ml-6 text-lg w-20"
             innerCircle="absolute bg-light-pink w-44 h-44"

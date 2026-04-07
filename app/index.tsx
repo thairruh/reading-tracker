@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from "react-native";
+import { View, Image } from "react-native";
 import { NavButton } from '../components/buttons/navButtons';
 import { Sidebar } from './Sidebar';
 
@@ -13,6 +13,7 @@ export default function IndexScreen() {
       btnStyle="bg-blue-500 p-4 rounded-lg"
       />
     </View>
+
   </Sidebar>
   );
 }
