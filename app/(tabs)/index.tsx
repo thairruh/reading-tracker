@@ -1,17 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 
-import CustomHeader from '@/components/header';
-import LowerNav from '@/components/lowerNav';
+// import CustomHeader from '@/components/header';
+// import LowerNav from '@/components/lowerNav';
+import DeskScreen from '../DeskScreen';
 
 export default function HomeScreen() {
   return (
     <View style={{ flex:1, backgroundColor: '#f3e6df' }}>
-      <CustomHeader/>
-      <View style={styles.titleContainer}>
-        <Text className="text-2xl font-bold mt-10 ml-10">Desk View</Text>
-      </View> 
-      <LowerNav/>
+      <DeskScreen/>
+  
     </View>
   );
 }
