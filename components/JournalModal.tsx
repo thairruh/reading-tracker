@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import JournalEntryPage from "./JournalEntryPage";
+import PastEntriesPage from "./PastEntriesPage";
 
 const journalImage = require("../assets/images/Journal-export.png");
 
@@ -90,11 +91,7 @@ export default function JournalModal({ visible, onClose }: JournalModalProps) {
                 />
               )}
 
-              {activeTab === "past" && (
-                <Text className="mt-8 text-center text-2xl text-[#5b3b2e]">
-                  Past Entries Page
-                </Text>
-              )}
+              {activeTab === "past" && <PastEntriesPage />}
 
               {activeTab === "stickers" && (
                 <Text className="mt-8 text-center text-2xl text-[#5b3b2e]">
