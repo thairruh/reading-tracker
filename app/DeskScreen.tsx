@@ -17,7 +17,7 @@ export default function DeskScreen() {
         <View className="absolute top-64 right-3 w-72 h-48 bg-bulletin-board border-8 border-bulletin-border" >
             <TouchableOpacity 
                 className="flex-1 justify-center items-center"
-                onPress ={() => router.push('./Bulletin')}>
+                onPress ={() => router.replace('./Bulletin')}>
 
             </TouchableOpacity>
         </View>
@@ -84,7 +84,7 @@ export default function DeskScreen() {
         <View className="absolute top-6 -left-12 items-start">
             <NavButton 
             text="Change Area" 
-            screenName=""  //file name linking to change area screen
+            screenName="/change-room"  //file name linking to change area screen
             btnStyle="bg-peach w-48 h-48 rounded-full"
             textStyle="ml-6 text-lg w-20"
             innerCircle="absolute bg-light-pink w-44 h-44"
@@ -95,7 +95,7 @@ export default function DeskScreen() {
         { /* 'Shop' Button */ }
         <View className="absolute -bottom-20 -right-24 w-full">
             <ImgButton
-            screenName="/" //file name that links to shop
+            screenName="/shop" //file name that links to shop
             imgSource={require('../figma-icons/shop_btn.png')}
             text="Shop"
             textStyle="absolute bottom-[80px] right-24 font-bold text-brown text-center"
