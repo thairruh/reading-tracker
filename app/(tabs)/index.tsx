@@ -249,7 +249,7 @@ function LeaderboardScreen({ go }: ScreenProps) {
       {/* Podium */}
       <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "flex-end", gap: 16, paddingHorizontal: 16, paddingBottom: 0 }}>
         {podiumOrder.map((u, i) => (
-          <View key={i} style={{ alignItems: "center", gap: 6, overflow: "visible" }}>
+          <View key={i} style={{ alignItems: "center", gap: 6}}>
             <Text style={{ fontSize: 22 }}>{medals[i]}</Text>
             <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: COLOR.pink, borderWidth: 2, borderColor: COLOR.pink, alignItems: "center", justifyContent: "center" }}>
               <Text style={{ fontSize: 18 }}>👤</Text>
@@ -258,7 +258,7 @@ function LeaderboardScreen({ go }: ScreenProps) {
               {u.name}
             </Text>
             <View style={{ width: 80, height: podiumHeights[i], backgroundColor: COLOR.pink, borderRadius: 0, borderTopLeftRadius: 10, borderTopRightRadius: 10, alignItems: "center", justifyContent: "center" }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 8 }}>
                 <Text style={{ fontSize: 9, color: COLOR.black, fontWeight: "700" }}>{u.pts}</Text>
                 <Image source={require("../../assets/images/diamond.png")} style={{ width: 12, height: 12 }} />
               </View>
@@ -278,7 +278,7 @@ function LeaderboardScreen({ go }: ScreenProps) {
                   <Text>👤</Text>
                 </View>
                 <Text style={{ flex: 1, fontSize: 13, color: COLOR.text }}>{u.name}</Text>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 3, overflow: "visible" }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 3, paddingRight: 6 }}>
                     <Text style={{ fontSize: 9, color: COLOR.black, fontWeight: "700" }}>{u.pts}</Text>
                     <Image source={require("../../assets/images/diamond.png")} style={{ width: 14, height: 14 }} />
                   </View>
