@@ -22,7 +22,7 @@ type ImgButtonProps = {
 export const NavButton = ({ text, screenName, btnStyle, textStyle, innerCircle }: NavButtonProps) => {
     const router = useRouter();
     return (
-        <TouchableOpacity onPress ={() => router.replace(screenName as any)}>
+        <TouchableOpacity onPress ={() => router.navigate(screenName as any)}>
             <View className={`flex items-center justify-center border-2 border-btn-border ${btnStyle}`}>
                 <View className={`rounded-full ${innerCircle}`}/>
                 <Text className={`font-bold text-brown ${textStyle}`}>{text}</Text>
@@ -34,7 +34,7 @@ export const NavButton = ({ text, screenName, btnStyle, textStyle, innerCircle }
 export const ImgButton = ({ screenName, imgSource, text, textStyle, imgStyle, resizeMode="cover" }: ImgButtonProps) => {
     const router = useRouter();
     return (
-        <TouchableOpacity onPress ={() => router.replace(screenName as any)}>
+        <TouchableOpacity onPress ={() => router.navigate(screenName as any)}>
             <View>
                 <ImageBackground source={imgSource} className={`${imgStyle}`} resizeMode={resizeMode}>
                     <Text className={`font-bold text-brown text-center ${textStyle}`}>{text}</Text>

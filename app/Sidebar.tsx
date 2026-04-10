@@ -64,7 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
         <View className="p-4 gap-4 absolute">
             
             {/* Profile */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/Bulletin')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/')} >
                 <Image 
                     source={require('../figma-icons/profile.png')}
                     className="w-12 h-12"
@@ -72,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
                 <Text className="left-5 font-bold text-2xl text-brown">Profile</Text>
             </TouchableOpacity>
             {/* Settings */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/Bulletin')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/')} >
                 <Image 
                     source={require('../figma-icons/settings.png')}
                     className="w-12 h-12"
@@ -81,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
             </TouchableOpacity>
 
             {/* Friends */}
-            <TouchableOpacity className="top-[390px] left-2 flex-row items-center" onPress={() => router.replace('/Bulletin')} >
+            <TouchableOpacity className="top-[390px] left-2 flex-row items-center" onPress={() => router.replace('/friends')} >
                 <Image 
                     source={require('../figma-icons/group_add.png')}
                     className="w-12 h-12"
@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
             </TouchableOpacity>  
 
             {/* Leaderboard */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/Bulletin')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/')} >
                 <Image 
                     source={require('../figma-icons/leaderboard.png')}
                     className="w-12 h-12"
@@ -99,7 +99,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
             </TouchableOpacity>
 
             {/* Notifications */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/Bulletin')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/')} >
                 <Image 
                     source={require('../figma-icons/notifications.png')}
                     className="w-12 h-12"
@@ -138,6 +138,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
     </Drawer>
     );
 };
+
+export default Sidebar;
 
 // // const Drawer = createDrawerNavigator<drawerType>();
 // // const DrawerScreens = () => {

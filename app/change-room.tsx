@@ -17,7 +17,7 @@ const ChangeRoom = () => {
         what the player's room actually looks like
       */}
 
-        <Link href="/desk" asChild>
+        <Link href="/DeskScreen" asChild>
           <Pressable style={styles.box}>
             <Text>Snapshot of Desk</Text>
           </Pressable>
