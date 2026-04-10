@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'expo-router';
 import { StyleSheet, Image, Text, View, Pressable } from "react-native";
 import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
 
@@ -7,6 +8,7 @@ interface EditBarProps {
 }
 
 export const EditBar = ({ donePressed }: EditBarProps) => {
+    const router = useRouter();
 
     return (
         <View className="flex-row absolute bottom-56 w-full">
@@ -18,7 +20,11 @@ export const EditBar = ({ donePressed }: EditBarProps) => {
                 <Text style={styles.text}>Delete</Text>
             </Pressable>
 
-            <Pressable style={styles.buttonstyle} className="border-l-0 border-r-hairline">
+            <Pressable 
+                onPress={() => router.navigate('/bulletin-add-note')}
+                style={styles.buttonstyle} 
+                className="border-l-0 border-r-hairline"
+                >
                 <Image
                     style={styles.image}
                     source={require('../figma-icons/add_box.png')}
@@ -34,7 +40,10 @@ export const EditBar = ({ donePressed }: EditBarProps) => {
                 <Text style={styles.text}>Edit Note</Text>
             </Pressable>
 
-            <Pressable style={styles.buttonstyle} className="border-l-0 border-r-hairline">
+            <Pressable 
+                style={styles.buttonstyle} 
+                className="border-l-0 border-r-hairline"
+                >
                 <Image
                     style={styles.image}
                     source={require('../figma-icons/add_sticker.png')}
@@ -42,9 +51,10 @@ export const EditBar = ({ donePressed }: EditBarProps) => {
                 <Text style={styles.text}>Stickers</Text>
             </Pressable>
 
-            <Pressable  className="border-l-0"
+            <Pressable  
                 onPress={donePressed} 
                 style={styles.buttonstyle}
+                className="border-l-0"
             >
                 <Image
                     style={styles.image}
