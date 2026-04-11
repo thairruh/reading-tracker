@@ -1,17 +1,10 @@
 import { useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  Pressable,
-  Image,
-  Dimensions,
-  TouchableWithoutFeedback,
-  Keyboard,
-} from "react-native";
+import { Modal, View, Text, Pressable, Image, Dimensions, TouchableWithoutFeedback, Keyboard, } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import JournalEntryPage from "./JournalEntryPage";
-import PastEntriesPage from "./PastEntriesPage";
+import PastEntriesPage, { Entry } from "./PastEntriesPage";
+import JournalEntryDetailPage from "./JournalEntryDetailPage";
+import EditJournalEntryPage from "./EditJournalEntryPage";
 
 const journalImage = require("../assets/images/Journal-export.png");
 
@@ -29,9 +22,12 @@ type JournalModalProps = {
 };
 
 type JournalTab = "entry" | "past" | "stickers";
+type PastView = "list" | "detail" | "edit";
 
 export default function JournalModal({ visible, onClose }: JournalModalProps) {
   const [activeTab, setActiveTab] = useState<JournalTab>("entry");
+  const [pastView, setPastView] = useState<PastView>("list");
+  const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
 
   // date picker state lives in the modal shell so the overlay can cover the whole journal
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -70,7 +66,11 @@ export default function JournalModal({ visible, onClose }: JournalModalProps) {
                   return (
                     <Pressable
                       key={tab}
-                      onPress={() => setActiveTab(tab)}
+                      onPress={() => {
+                        setActiveTab(tab);
+                        setSelectedEntry(null);
+                        setPastView("list");
+                      }}
                       className={`h-[48px] w-[84px] items-center justify-center rounded-r-[16px] ${
                         isActive ? "bg-[#e8d8cf]" : "bg-[#d6c3b7]"
                       }`}
@@ -91,7 +91,46 @@ export default function JournalModal({ visible, onClose }: JournalModalProps) {
                 />
               )}
 
-              {activeTab === "past" && <PastEntriesPage />}
+              {activeTab === "past" && pastView === "list" && (
+                <PastEntriesPage
+                  onSelectEntry={(entry) => {
+                    setSelectedEntry(entry);
+                    setPastView("detail");
+                  }}
+                />
+              )}
+
+              {activeTab === "past" && pastView === "detail" && selectedEntry && (
+                <JournalEntryDetailPage
+                  entry={selectedEntry}
+                  onBack={() => {
+                    setSelectedEntry(null);
+                    setPastView("list");
+                  }}
+                  onDeleteSuccess={() => {
+                    setSelectedEntry(null);
+                    setPastView("list");
+                  }}
+                  onEdit={(entry) => {
+                    setSelectedEntry(entry);
+                    setSelectedDate(entry.date ? new Date(entry.date) : new Date());
+                    setPastView("edit");
+                  }}
+                />
+              )}
+
+              {activeTab === "past" && pastView === "edit" && selectedEntry && (
+                <EditJournalEntryPage
+                  entry={selectedEntry}
+                  selectedDate={selectedDate}
+                  onOpenDatePicker={() => setShowDatePicker(true)}
+                  onCancel={() => setPastView("detail")}
+                  onSave={(updatedEntry) => {
+                    setSelectedEntry(updatedEntry);
+                    setPastView("detail");
+                  }}
+                />
+              )}
 
               {activeTab === "stickers" && (
                 <Text className="mt-8 text-center text-2xl text-[#5b3b2e]">

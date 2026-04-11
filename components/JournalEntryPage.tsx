@@ -41,7 +41,7 @@ import { Alert } from "react-native";
         if (!date) return "";
         const month = String(date.getMonth() + 1).padStart(2, "0");
         const day = String(date.getDate()).padStart(2, "0");
-        const year = String(date.getFullYear()).slice(-2);
+        const year = date.getFullYear();
         return `${month}/${day}/${year}`;
     }
 
@@ -75,7 +75,7 @@ import { Alert } from "react-native";
             notes,
             });
 
-            Alert.alert("Success", "Entry saved!");
+            Alert.alert("Entry saved!");
 
             // optional reset
             setNotes("");
