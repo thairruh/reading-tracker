@@ -3,6 +3,9 @@ import React from 'react';
 import { Pressable, View, Image, Text, StyleSheet, TouchableOpacity, } from "react-native";
 import EditBar from '../components/bulletin-edit-bar';
 
+
+
+
 export default function Bulletin() {
     const navigation = useRouter();
     const [isVisible, setIsVisible] = React.useState(false);

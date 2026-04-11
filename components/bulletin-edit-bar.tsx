@@ -67,6 +67,34 @@ export const EditBar = ({ donePressed }: EditBarProps) => {
     );
 }
 
+export const NoteEditBar = ({ donePressed }: EditBarProps) => {
+    const router = useRouter();
+
+    return (
+        <View className="flex-row absolute bottom-56 w-full">
+            <Pressable style={styles.buttonstyle} className="border-r-hairline">
+                <Image
+                    style={styles.image}
+                    source={require('../figma-icons/delete.png')}
+                />
+                <Text style={styles.text}>Delete</Text>
+            </Pressable>
+
+            <Pressable  
+                onPress={donePressed} 
+                style={styles.buttonstyle}
+                className="border-l-0"
+            >
+                <Image
+                    style={styles.image}
+                    source={require('../figma-icons/check.png')}
+                />    
+                <Text style={styles.text}>Done</Text>
+            </Pressable>
+        </View>
+    );
+}
+
 const styles = StyleSheet.create({
     buttonstyle: {
         width: 65,
