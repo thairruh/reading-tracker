@@ -92,7 +92,7 @@ export type Entry = {
                 >
                     <View className="mb-3 flex-row justify-between">
                     <Text
-                        className="mr-4 flex-1 text-[15px] font-medium text-[#2f211d]"
+                        className="mr-4 flex-1 text-[15px] font-bold text-[#2f211d]"
                         numberOfLines={1}
                     >
                         {entry.book || "Untitled"}

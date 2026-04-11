@@ -1,4 +1,4 @@
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "./config";
 import { User } from "firebase/auth";
 
@@ -19,7 +19,22 @@ export async function createUserDocument(user: User) {
         favoriteBook: "",
         currentlyReading: "",
         rewardedJournalDates: {},
+        unlockedStickers: {},
         },
         { merge: true }
     );
+}
+
+export async function getUserDocument(uid: string) {
+    const ref = doc(db, "users", uid);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) {
+        return null;
+    }
+
+    return {
+        id: snapshot.id,
+        ...snapshot.data(),
+    };
 }

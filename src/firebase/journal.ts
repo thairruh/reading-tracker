@@ -37,12 +37,16 @@ export async function createJournalEntry(entry: JournalEntry) {
         updatedAt: serverTimestamp(),
     });
 
-    await awardJournalEntryGems(entry.userId, entry.date, entry.pagesRead);
+    await awardJournalEntryRewards(entry.userId, entry.date, entry.pagesRead);
 
     return docRef.id;
 }
 
-async function awardJournalEntryGems(userId: string, entryDate: string, pagesRead: number) {
+async function awardJournalEntryRewards(
+    userId: string,
+    entryDate: string,
+    pagesRead: number
+    ) {
     const userRef = doc(db, "users", userId);
 
     const selectedDateKey = getDateKey(entryDate);
@@ -52,42 +56,44 @@ async function awardJournalEntryGems(userId: string, entryDate: string, pagesRea
         const userSnap = await transaction.get(userRef);
 
         if (!userSnap.exists()) {
-            throw new Error("User document does not exist");
+        throw new Error("User document does not exist");
         }
 
         const userData = userSnap.data();
         const rewardedJournalDates = userData.rewardedJournalDates ?? {};
-
-        // already rewarded for this date
-        if (rewardedJournalDates[selectedDateKey]) {
-            transaction.update(userRef, {
-                totalPagesRead: increment(pagesRead),
-            });
-            return;
-        }
+        const unlockedStickers = userData.unlockedStickers ?? {};
 
         let gemsToAward = 0;
 
-        if (selectedDateKey === todayKey) { // if entry is for today, award more gems to encourage daily journaling
+        // only award gems the first time this selected journal date is completed
+        if (!rewardedJournalDates[selectedDateKey]) {
+        if (selectedDateKey === todayKey) {
             gemsToAward = 25;
-        } else if (selectedDateKey < todayKey) { // if entry is for a past date, award some gems but less than a same-day entry
+        } else if (selectedDateKey < todayKey) {
             gemsToAward = 10;
-        } else {    // additional entries for the same date should not award extra gems
+        } else {
             gemsToAward = 0;
         }
+        }
 
-        const updatedRewardedDates = 
-            gemsToAward > 0
+        const updatedRewardedDates =
+        gemsToAward > 0
             ? { ...rewardedJournalDates, [selectedDateKey]: true }
             : rewardedJournalDates;
 
-            transaction.update(userRef, {
-                gems: increment(gemsToAward),
-                totalPagesRead: increment(pagesRead),
-                rewardedJournalDates: updatedRewardedDates,
-                });
-            });
-        }
+        const updatedUnlockedStickers = {
+        ...unlockedStickers,
+        first_entry: true,
+        };
+
+        transaction.update(userRef, {
+        gems: increment(gemsToAward),
+        totalPagesRead: increment(pagesRead),
+        rewardedJournalDates: updatedRewardedDates,
+        unlockedStickers: updatedUnlockedStickers,
+        });
+    });
+    }
 
 // get all user entries
 export async function getUserJournalEntries(userId: string) {

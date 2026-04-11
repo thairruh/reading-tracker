@@ -5,6 +5,7 @@ import JournalEntryPage from "./JournalEntryPage";
 import PastEntriesPage, { Entry } from "./PastEntriesPage";
 import JournalEntryDetailPage from "./JournalEntryDetailPage";
 import EditJournalEntryPage from "./EditJournalEntryPage";
+import StickersPage from "./StickersPage";
 
 const journalImage = require("../assets/images/Journal-export.png");
 
@@ -15,6 +16,22 @@ const { width } = Dimensions.get("window");
 const modalWidth = Math.min(width * 1.0, 400); // max 400px
 const aspectRatio = 780 / 400; // your original ratio
 const modalHeight = modalWidth * aspectRatio;
+
+// images for tabs
+const JOURNAL_TABS = [
+  {
+    key: "entry" as const,
+    image: require("../assets/journal-tabs/entry-tab.png"),
+  },
+  {
+    key: "past" as const,
+    image: require("../assets/journal-tabs/past-tab.png"),
+  },
+  {
+    key: "stickers" as const,
+    image: require("../assets/journal-tabs/stickers-tab.png"),
+  },
+];
 
 type JournalModalProps = {
   visible: boolean;
@@ -49,6 +66,7 @@ export default function JournalModal({ visible, onClose }: JournalModalProps) {
               source={journalImage}
               className="absolute h-full w-full"
               resizeMode="contain"
+              
             />
 
             {/* overlay content */}
@@ -59,25 +77,25 @@ export default function JournalModal({ visible, onClose }: JournalModalProps) {
               </Pressable>
 
               {/* right side tabs */}
-              <View className="absolute right-[-55px] top-[110px] gap-y-3 z-10">
-                {(["entry", "past", "stickers"] as JournalTab[]).map((tab) => {
-                  const isActive = activeTab === tab;
+              <View className="absolute right-[-38px] top-[110px]  z-10">
+                {JOURNAL_TABS.map((tab) => {
+                  const isActive = activeTab === tab.key;
 
                   return (
                     <Pressable
-                      key={tab}
+                      key={tab.key}
                       onPress={() => {
-                        setActiveTab(tab);
+                        setActiveTab(tab.key);
                         setSelectedEntry(null);
                         setPastView("list");
                       }}
-                      className={`h-[48px] w-[84px] items-center justify-center rounded-r-[16px] ${
-                        isActive ? "bg-[#e8d8cf]" : "bg-[#d6c3b7]"
-                      }`}
+                      className={`h-[60px] w-[50px] items-center justify-center rounded-[10px]`}
                     >
-                      <Text className="text-[12px] capitalize text-[#5b3b2e]">
-                        {tab}
-                      </Text>
+                      <Image
+                        source={tab.image}
+                        resizeMode = "contain"
+                        className = "w-[60px] h-[40px]"
+                      />
                     </Pressable>
                   );
                 })}
@@ -132,11 +150,7 @@ export default function JournalModal({ visible, onClose }: JournalModalProps) {
                 />
               )}
 
-              {activeTab === "stickers" && (
-                <Text className="mt-8 text-center text-2xl text-[#5b3b2e]">
-                  Stickers Page
-                </Text>
-              )}
+              {activeTab === "stickers" && <StickersPage />}
             </View>
 
             {/* date picker overlay */}
