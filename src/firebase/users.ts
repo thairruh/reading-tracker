@@ -18,7 +18,7 @@ export async function createUserDocument(user: User) {
         longestStreak: 0,
         favoriteBook: "",
         currentlyReading: "",
-        lastGemAwardDate: "",
+        rewardedJournalDates: {},
         },
         { merge: true }
     );
