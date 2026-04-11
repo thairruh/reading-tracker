@@ -1,22 +1,14 @@
 import { useState } from "react";
-import {
-    View,
-    Text,
-    Pressable,
-    TextInput,
-    Keyboard,
-    Button,
-    } from "react-native";
+import { View, Text, Pressable, TextInput, Keyboard, Alert, Image, } from "react-native";
 import { auth } from "@/src/firebase/config";
 import { createJournalEntry } from "@/src/firebase/journal";
-import { Alert } from "react-native";
 
-    type JournalEntryPageProps = {
+type JournalEntryPageProps = {
     selectedDate: Date | null;
     onOpenDatePicker: () => void;
-    };
+};
 
-    export default function JournalEntryPage({
+export default function JournalEntryPage({
     selectedDate,
     onOpenDatePicker,
     }: JournalEntryPageProps) {
@@ -25,10 +17,16 @@ import { Alert } from "react-native";
 
     const [pagesRead, setPagesRead] = useState("");
     const [isPrivate, setIsPrivate] = useState(true);
-
     const [notes, setNotes] = useState("");
+    const [saving, setSaving] = useState(false);
 
-    // hardcoded saved books for dropdown - will be replaced with dynamic data later
+    const [showSuccessScreen, setShowSuccessScreen] = useState(false);
+    const [gemsEarned, setGemsEarned] = useState(0);
+    const [rewardReason, setRewardReason] = useState("");
+    const [showFirstEntrySticker, setShowFirstEntrySticker] = useState(false);
+
+    const gemIcon = require("../assets/images/gem.png");
+
     const savedBooks = [
         "Fourth Wing",
         "The Hunger Games",
@@ -49,50 +47,104 @@ import { Alert } from "react-native";
         const user = auth.currentUser;
 
         if (!user) {
-            Alert.alert("Error", "You must be logged in.");
-            return;
+        Alert.alert("Error", "You must be logged in.");
+        return;
         }
 
         if (!book.trim()) {
-            Alert.alert("Missing info", "Please select or enter a book.");
-            return;
+        Alert.alert("Missing info", "Please select or enter a book.");
+        return;
         }
 
         if (!notes.trim()) {
-            Alert.alert("Missing info", "Please write something in your notes.");
-            return;
+        Alert.alert("Missing info", "Please write something in your notes.");
+        return;
         }
 
         try {
-            await createJournalEntry({
+        setSaving(true);
+
+        const result = await createJournalEntry({
             userId: user.uid,
             book,
             pagesRead: Number(pagesRead) || 0,
-            date: selectedDate
-                ? selectedDate.toISOString()
-                : new Date().toISOString(),
+            date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
             isPrivate,
             notes,
-            });
+        });
 
-            Alert.alert("Entry saved!");
+        setGemsEarned(result.gemsAwarded);
+        setRewardReason(result.rewardReason);
+        setShowFirstEntrySticker(result.unlockedStickerIds.includes("first_entry"));
+        setShowSuccessScreen(true);
 
-            // optional reset
-            setNotes("");
-            setPagesRead("");
-            setBook("");
+        setNotes("");
+        setPagesRead("");
+        setBook("");
+        setBookDropdownOpen(false);
+        setIsPrivate(true);
         } catch (error: any) {
-            Alert.alert("Error", error.message ?? "Failed to save entry");
+        Alert.alert("Error", error.message ?? "Failed to save entry");
+        } finally {
+        setSaving(false);
         }
+    }
+
+    function handleBackToEntryScreen() {
+        setShowSuccessScreen(false);
+        setGemsEarned(0);
+        setRewardReason("");
+        setShowFirstEntrySticker(false);
+    }
+
+    if (showSuccessScreen) {
+        return (
+        <View className="flex-1 items-center justify-center px-8 ">
+            <Text className="text-center text-[30px] font-bold text-[#472A2A]">
+            Entry Saved!
+            </Text>
+
+            <View className="mt-6 w-full rounded-[18px] border border-[#9b8277] bg-[#EEDBD3] px-5 py-5">
+            <View className=" flex-row items-center justify-center">
+            <Text className="text-[24px] font-bold text-[#472A2A]">
+                +{gemsEarned}
+            </Text>
+            <Image
+                source={gemIcon}
+                resizeMode="contain"
+                className="ml-2 h-[24px] w-[24px]"
+            />
+            </View>
+
+            <Text className="mt-3 text-center text-[14px] leading-6 text-[#5b3b2e]">
+                {rewardReason}
+            </Text>
+
+            {showFirstEntrySticker && (
+                <Text className="mt-4 text-center text-[14px] leading-6 text-pink-500">
+                Earned a sticker!
+                </Text>
+            )}
+            </View>
+
+            <Pressable
+            onPress={handleBackToEntryScreen}
+            className="mt-6 rounded-[14px] border border-[#70925a] bg-[#D7E9C1] px-6 py-3"
+            >
+            <Text className="text-[18px] font-semibold text-[#472A2A]">
+                ← Back
+            </Text>
+            </Pressable>
+        </View>
+        );
     }
 
     return (
         <View className="relative flex-1">
-        <Text className="mt-4 text-[29px] font-bold text-[#472A2A] text-center">
+        <Text className="mt-4 text-center text-[29px] font-bold text-[#472A2A]">
             Journal Entry
         </Text>
 
-        {/* book input with dropdown */}
         <View className="relative mt-6 ml-6 mr-10">
             <View className="flex-row items-center">
             <Text className="w-[60px] text-[15px] text-[#472A2A]">Book:</Text>
@@ -134,7 +186,6 @@ import { Alert } from "react-native";
             )}
         </View>
 
-        {/* pages input */}
         <View className="relative mt-5 ml-6 mr-10">
             <View className="flex-row items-center">
             <Text className="w-[95px] text-[15px] text-[#472A2A]">
@@ -148,13 +199,12 @@ import { Alert } from "react-native";
                 keyboardType="numeric"
                 placeholder="0"
                 placeholderTextColor="#8c7569"
-                className="flex-1 text-[14px] text-[#472A2A] text-center"
+                className="flex-1 text-center text-[14px] text-[#472A2A]"
                 />
             </View>
             </View>
         </View>
 
-        {/* date picker button */}
         <View className="relative mt-5 ml-6 mr-10">
             <View className="flex-row items-center">
             <Text className="w-[95px] text-[15px] text-[#472A2A]">Date:</Text>
@@ -168,7 +218,7 @@ import { Alert } from "react-native";
                 className="h-[36px] w-[95px] flex-row items-center rounded-[8px] border border-[#9b8277] bg-[#EEDBD3] px-3"
             >
                 <Text
-                className={`flex-1 text-[14px] pt-2 ${
+                className={`flex-1 pt-2 text-[14px] ${
                     selectedDate ? "text-[#5b3b2e]" : "text-[#8c7569]"
                 }`}
                 >
@@ -179,7 +229,6 @@ import { Alert } from "react-native";
             </View>
         </View>
 
-        {/* privacy checkboxes */}
         <View className="mt-5 ml-6 mr-10 flex-row items-center">
             <View className="mr-10 flex-row items-center">
             <Text className="mr-2 text-[15px] text-[#472A2A]">Private:</Text>
@@ -206,33 +255,34 @@ import { Alert } from "react-native";
             </View>
         </View>
 
-        {/* notes input */}
-        <View className="relative mt-5 ml-6 mr-10 ">
+        <View className="relative mt-5 ml-6 mr-10">
             <Text className="mb-2 text-[15px] text-[#472A2A]">Notes:</Text>
 
-            <View className="relative h-[155px] rounded-[10px] border border-[#9b8277] bg-[#EEDBD3] px-4 py-3 overflow-hidden">
-                <TextInput
+            <View className="relative h-[155px] overflow-hidden rounded-[10px] border border-[#9b8277] bg-[#EEDBD3] px-4 py-3">
+            <TextInput
                 value={notes}
                 onChangeText={setNotes}
                 multiline
                 textAlignVertical="top"
                 placeholder="Write your thoughts here..."
                 placeholderTextColor="#8c7569"
-                className="flex-1 text-[15px]  text-[#472A2A]"
-                />
-
+                className="flex-1 text-[15px] text-[#472A2A]"
+            />
             </View>
         </View>
 
         <View className="mt-3 items-center">
-        <Pressable onPress={handleSave} className="rounded-[14px] border border-[#70925a] bg-[#D7E9C1] px-8 py-3">
+            <Pressable
+            onPress={handleSave}
+            disabled={saving}
+            className="rounded-[14px] border border-[#70925a] bg-[#D7E9C1] px-8 py-3"
+            style={{ opacity: saving ? 0.7 : 1 }}
+            >
             <Text className="text-[18px] font-semibold text-[#472A2A]">
-            Save Entry
+                {saving ? "Saving..." : "Save Entry"}
             </Text>
-        </Pressable>
-        </View>  
-
-    </View>
-
+            </Pressable>
+        </View>
+        </View>
     );
 }

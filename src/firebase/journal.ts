@@ -5,9 +5,16 @@ export type JournalEntry = {
     userId: string;
     book: string;
     pagesRead: number;
-    date: string; 
+    date: string;
     isPrivate: boolean;
     notes: string;
+};
+
+export type CreateJournalEntryResult = {
+    entryId: string;
+    gemsAwarded: number;
+    rewardReason: string;
+    unlockedStickerIds: string[];
 };
 
 function getDateKey(dateInput: string | Date) {
@@ -25,7 +32,9 @@ function getDateKey(dateInput: string | Date) {
 }
 
 // create entry
-export async function createJournalEntry(entry: JournalEntry) {
+export async function createJournalEntry(
+    entry: JournalEntry
+    ): Promise<CreateJournalEntryResult> {
     const docRef = await addDoc(collection(db, "journalEntries"), {
         userId: entry.userId,
         book: entry.book,
@@ -37,22 +46,35 @@ export async function createJournalEntry(entry: JournalEntry) {
         updatedAt: serverTimestamp(),
     });
 
-    await awardJournalEntryRewards(entry.userId, entry.date, entry.pagesRead);
+    const rewardResult = await awardJournalEntryRewards(
+        entry.userId,
+        entry.date,
+        entry.pagesRead
+    );
 
-    return docRef.id;
+    return {
+        entryId: docRef.id,
+        gemsAwarded: rewardResult.gemsAwarded,
+        rewardReason: rewardResult.rewardReason,
+        unlockedStickerIds: rewardResult.unlockedStickerIds,
+    };
 }
 
 async function awardJournalEntryRewards(
     userId: string,
     entryDate: string,
     pagesRead: number
-    ) {
+    ): Promise<{
+    gemsAwarded: number;
+    rewardReason: string;
+    unlockedStickerIds: string[];
+    }> {
     const userRef = doc(db, "users", userId);
 
     const selectedDateKey = getDateKey(entryDate);
     const todayKey = getDateKey(new Date());
 
-    await runTransaction(db, async (transaction) => {
+    return runTransaction(db, async (transaction) => {
         const userSnap = await transaction.get(userRef);
 
         if (!userSnap.exists()) {
@@ -64,16 +86,22 @@ async function awardJournalEntryRewards(
         const unlockedStickers = userData.unlockedStickers ?? {};
 
         let gemsToAward = 0;
+        let rewardReason = "Check back tomorrow or log a new day to earn more gems!";
 
-        // only award gems the first time this selected journal date is completed
         if (!rewardedJournalDates[selectedDateKey]) {
         if (selectedDateKey === todayKey) {
             gemsToAward = 25;
+            rewardReason = "You filled your first entry for today! Come back daily to earn more gems.";
         } else if (selectedDateKey < todayKey) {
             gemsToAward = 10;
+            rewardReason = "You filled an entry for a past day! Earned fewer gems than a same-day entry, but it's great that you logged it.";
         } else {
             gemsToAward = 0;
+            rewardReason = "Future-dated entries do not earn gems.";
         }
+        } else {
+        gemsToAward = 0;
+        rewardReason = "Check back tomorrow or log a new day to earn more gems!";
         }
 
         const updatedRewardedDates =
@@ -81,10 +109,13 @@ async function awardJournalEntryRewards(
             ? { ...rewardedJournalDates, [selectedDateKey]: true }
             : rewardedJournalDates;
 
-        const updatedUnlockedStickers = {
-        ...unlockedStickers,
-        first_entry: true,
-        };
+        const unlockedStickerIds: string[] = [];
+        const updatedUnlockedStickers = { ...unlockedStickers };
+
+        if (!updatedUnlockedStickers.first_entry) {
+        updatedUnlockedStickers.first_entry = true;
+        unlockedStickerIds.push("first_entry");
+        }
 
         transaction.update(userRef, {
         gems: increment(gemsToAward),
@@ -92,8 +123,14 @@ async function awardJournalEntryRewards(
         rewardedJournalDates: updatedRewardedDates,
         unlockedStickers: updatedUnlockedStickers,
         });
+
+        return {
+        gemsAwarded: gemsToAward,
+        rewardReason,
+        unlockedStickerIds,
+        };
     });
-    }
+}
 
 // get all user entries
 export async function getUserJournalEntries(userId: string) {
@@ -105,7 +142,7 @@ export async function getUserJournalEntries(userId: string) {
 
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data(),}));
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
 // get one entry
@@ -127,7 +164,7 @@ export async function getJournalEntryById(entryId: string) {
 export async function updateJournalEntry(
     entryId: string,
     updates: Partial<JournalEntry>
-) {
+    ) {
     const ref = doc(db, "journalEntries", entryId);
 
     await updateDoc(ref, {
@@ -135,7 +172,6 @@ export async function updateJournalEntry(
         updatedAt: serverTimestamp(),
     });
 }
-
 
 // delete entry
 export async function deleteJournalEntry(entryId: string) {
