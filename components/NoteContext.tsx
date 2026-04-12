@@ -9,6 +9,7 @@ export interface NoteData {
     left: number;
 }
 
+//Defines what the Context provides
 interface NoteContextType {
     notes: NoteData[];
     addNote: (newNote: NoteData) => void;
@@ -16,12 +17,17 @@ interface NoteContextType {
 
 const NoteContext = createContext<NoteContextType | undefined>(undefined);
 
+//Provider component so other screens can access note data
 export const NoteProvider = ( { children }: { children: ReactNode }) => {
     const [notes, setNotes] = useState<NoteData[]>([]);
 
+    //Function to add new note to existing list of data   
     const addNote = (newNote: NoteData) => {
         setNotes((prev) => [...prev, newNote]);
     };
+    const deleteNote = (id: number) => {
+        setNotes((prevNote) => prevNote.filter((note) => note.id !== id));
+    }
 
     return (
         <NoteContext.Provider value={ {notes, addNote} }>

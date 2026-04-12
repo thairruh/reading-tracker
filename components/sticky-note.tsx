@@ -4,7 +4,7 @@ import { View, Text, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback,
 
 type NoteProps = {
 id?: number,
-color?: string,
+color: string,
 text?: string,
 top?: number,
 left?: number,

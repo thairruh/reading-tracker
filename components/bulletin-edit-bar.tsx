@@ -1,11 +1,14 @@
 import React from 'react';
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { StyleSheet, Image, Text, View, Pressable } from "react-native";
 import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
+import { useNotes } from './NoteContext';
 
 interface EditBarProps {
     addNotePressed?: () => void;
     donePressed?: () => void;
+    text?: string;
+    color?: string;
 }
 
 export const EditBar = ({ addNotePressed, donePressed }: EditBarProps) => {
@@ -68,8 +71,23 @@ export const EditBar = ({ addNotePressed, donePressed }: EditBarProps) => {
     );
 }
 
-export const NoteEditBar = ({ donePressed }: EditBarProps) => {
-    const router = useRouter();
+export const NoteEditBar = ({ donePressed, text, color }: EditBarProps) => {
+    const navigation = useNavigation();
+    const { addNote } = useNotes();
+
+    const handleDone = () => { 
+        const newNote = {
+            id: Date.now(),
+            text: text,
+            color: color,
+            top: Math.random() * 400,
+            left: Math.random() * 300,
+        };
+
+        addNote(newNote);
+
+        navigation.goBack();
+    };
 
     return (
         <View className="flex-row absolute bottom-56 w-full">
@@ -82,7 +100,7 @@ export const NoteEditBar = ({ donePressed }: EditBarProps) => {
             </Pressable>
 
             <Pressable  
-                onPress={donePressed} 
+                onPress={handleDone} 
                 style={styles.buttonstyle}
                 className="border-l-0"
             >

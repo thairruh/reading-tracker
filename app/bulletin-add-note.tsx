@@ -19,20 +19,6 @@ export default function AddNote() {
     const colors: ColorOptions[] = ['#EFCB8C', '#CAC1C6', '#CCD4BF', '#C7CFD1','#EFDBD4'];
                                  //[ yellow,    purple,     green,      blue,     pink ]
 
-    const { addNote } = useNotes();
-    const handleDone = () => { 
-        const newNote = {
-            id: Date.now(),
-            text: value,
-            color: selectedColor,
-            top: Math.random() * 400,
-            left: Math.random() * 300,
-        };
-        setNotes(prev => [...prev, newNote]);
-
-        addNote(newNote);
-        navigation.goBack();
-    };
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <View style={styles.container}>
@@ -70,7 +56,7 @@ export default function AddNote() {
                 </View> 
 
                 <View className="absolute -bottom-40 m-36">
-                     <NoteEditBar addNotePressed={handleDone}/>
+                     <NoteEditBar text={value} color={selectedColor}/>
                 </View>
 
             </View>

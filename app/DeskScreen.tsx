@@ -40,7 +40,7 @@ export default function DeskScreen() {
 
   return (
     <Sidebar gems={gems}>
-       
+    
     <View className="flex-1 items-center justify-center bg-light-pink">
 
         <Stack.Screen options={{ headerShown: false, contentStyle: { paddingTop: 0, marginTop: 0 }  }} />
