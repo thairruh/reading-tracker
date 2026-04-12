@@ -1,13 +1,45 @@
 import { Stack, useRouter } from 'expo-router';
-import React from 'react';
-import { Image, TouchableOpacity, View } from "react-native";
+import React, { use, useEffect, useState } from 'react';
+import { Image, TouchableOpacity, View, Text } from "react-native";
 import { ImgButton, NavButton } from '../components/buttons/navButtons';
 import { Sidebar } from './Sidebar';
+import JournalModal from '../components/JournalModal';
+import { Asset } from 'expo-asset';
+import { auth, db } from '@/src/firebase/config';
+import { getUserDocument } from '@/src/firebase/users';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 export default function DeskScreen() {
     const router = useRouter();
+    const [journalVisible, setJournalVisible] = useState(false);
+    const [gems, setGems] = useState(0);
+
+    // load journal image into cache for smoother performance when opening journal modal
+    useEffect(() => {
+    Asset.loadAsync(require("../assets/images/Journal-export.png"));
+    Asset.loadAsync(require("../assets/journal-tabs/entry-tab.png"));
+    Asset.loadAsync(require("../assets/journal-tabs/past-tab.png"));
+    Asset.loadAsync(require("../assets/journal-tabs/stickers-tab.png"));
+    }, []);
+
+
+    // fetch user data to get gems for display on deskscreen
+    useEffect(() => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const ref = doc(db, "users", user.uid);
+
+        const unsubscribe = onSnapshot(ref, (snap) => {
+            const data = snap.data();
+            setGems(data?.gems ?? 0);
+        });
+
+        return unsubscribe;
+    }, []);
+
   return (
-    <Sidebar>
+    <Sidebar gems={gems}>
        
     <View className="flex-1 items-center justify-center bg-light-pink">
 
@@ -23,7 +55,7 @@ export default function DeskScreen() {
         </View>
 
         {/* Desk */}
-        <View className="absolute bottom-0 w-full h-80 bg-pink border-t-2 border-desk-shading/50" />
+        <View className="absolute bottom-0 w-full h-80 bg-[#FAECEC] border-t-2 border-desk-shading/50" />
         {/* Under desk shading */}
         <View className="absolute bottom-0 w-full h-32 bg-desk-shading z-0" />
         {/* Underdesk */}
@@ -48,23 +80,29 @@ export default function DeskScreen() {
 
         {/* Gem Box */}
             <View className="absolute top-[45px] right-20">
-                <Image
+            <Image
                 source={require('../figma-icons/gem_Box.png')}
                 className="w-[82px]"
-                resizeMode='contain'
-                />
-            </View> 
+                resizeMode="contain"
+            />
+
+            {/* Gems text */}
+            <View className="absolute inset-y-0 right-2 items-center justify-center">
+                <Text className="text-[12px] text-black">
+                {gems}
+                </Text>
+            </View>
+            </View>
 
         {/* Journal on desk */}
         <View className="absolute bottom-12">
-            <ImgButton
-            screenName="/" //file name that links to shop
-            imgSource={require('../figma-icons/desk-journal.png')}
-            text=""
-            textStyle=""
-            imgStyle="w-72 h-72"
+        <TouchableOpacity onPress={() => setJournalVisible(true)}>
+            <Image
+            source={require('../figma-icons/desk-journal.png')}
+            className="w-72 h-72"
             resizeMode="cover"
             />
+        </TouchableOpacity>
         </View>
 
 
@@ -116,6 +154,10 @@ export default function DeskScreen() {
         </View>
 
     </View>
+    <JournalModal
+    visible={journalVisible}
+    onClose={() => setJournalVisible(false)}
+    />
     </Sidebar>
   );
 };

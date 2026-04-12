@@ -25,16 +25,20 @@ export async function createUserDocument(user: User) {
     );
 }
 
-export async function getUserDocument(uid: string) {
-    const ref = doc(db, "users", uid);
+export type UserData = {
+    gems: number;
+    totalPagesRead: number;
+    currentStreak: number;
+    longestStreak: number;
+    rewardedJournalDates: Record<string, boolean>;
+    unlockedStickers: Record<string, boolean>;
+};
+
+export async function getUserDocument(userId: string): Promise<UserData | null> {
+    const ref = doc(db, "users", userId);
     const snapshot = await getDoc(ref);
 
-    if (!snapshot.exists()) {
-        return null;
-    }
+    if (!snapshot.exists()) return null;
 
-    return {
-        id: snapshot.id,
-        ...snapshot.data(),
-    };
+    return snapshot.data() as UserData;
 }

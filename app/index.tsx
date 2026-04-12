@@ -26,7 +26,7 @@ export default function Index() {
   }
 
   if (currentUser) {
-    return <Redirect href="/deskscreen" />;
+    return <Redirect href="/(tabs)" />;
   }
 
   return <Redirect href="/auth-test" />;

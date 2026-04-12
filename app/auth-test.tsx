@@ -14,7 +14,7 @@ export default function AuthTestScreen() {
         setCurrentUser(user);
 
         if (user) {
-            router.replace("/deskscreen");
+            router.replace("/(tabs)");
         }
         });
 
@@ -25,7 +25,7 @@ export default function AuthTestScreen() {
         try {
         const user = await register(email, password);
         Alert.alert("Registered", user.email ?? user.uid);
-        router.replace("/deskscreen");
+        router.replace("/(tabs)");
         } catch (error: any) {
         if (error.code === "auth/email-already-in-use") {
             Alert.alert("Account exists", "This email already exists. Try logging in.");
@@ -40,7 +40,7 @@ export default function AuthTestScreen() {
         try {
         const user = await login(email, password);
         Alert.alert("Logged in", user.email ?? user.uid);
-        router.replace("/deskscreen");
+        router.replace("/(tabs)");
         } catch (error: any) {
         Alert.alert("Login error", error.message ?? "Something went wrong");
         }
