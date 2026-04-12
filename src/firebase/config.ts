@@ -1,13 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-
-// Work around Firebase TS typing bug for React Native persistence
-const {
-    initializeAuth,
-    getReactNativePersistence,
-} = require("firebase/auth");
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -20,15 +13,7 @@ const firebaseConfig = {
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-const auth = (() => {
-    try {
-        return initializeAuth(app, {
-        persistence: getReactNativePersistence(AsyncStorage),
-        });
-    } catch {
-        return getAuth(app);
-    }
-})();
+const auth = getAuth(app);
 
 const db = getFirestore(app);
 

@@ -4,6 +4,7 @@ import { Pressable, View, Image, Text, StyleSheet, TouchableOpacity, } from "rea
 import EditBar from '../components/bulletin-edit-bar';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StickyNote } from '@/components/sticky-note';
+import { useNotes } from '@/components/NoteContext';
 
 
 interface PositionNote {
@@ -30,6 +31,7 @@ export default function Bulletin() {
         setNote(prev => [...prev, newNote]);        
     };
 
+  const { notes } = useNotes();
   return (
     
     <View className="flex-1 relative bg-light-pink">
@@ -62,6 +64,8 @@ export default function Bulletin() {
                     <EditBar donePressed={closeEditBar}/>
                 </View>
             )}
+
+            {notes.map(note => <StickyNote key={note.id} {...note} />)}
         </View>
     </View>
 

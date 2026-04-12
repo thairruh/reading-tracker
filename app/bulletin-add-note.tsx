@@ -4,6 +4,8 @@ import { View, Text, Pressable, StyleSheet, TextInput, Image, TouchableWithoutFe
 import { NoteEditBar } from '@/components/bulletin-edit-bar';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StickyNote } from '@/components/sticky-note';
+import { useNotes } from '@/components/NoteContext';
+import { NoteData } from '@/components/NoteContext';
 
 type ColorOptions = '#EFCB8C' | '#CAC1C6' | '#CCD4BF' | '#C7CFD1' | '#EFDBD4';
 
@@ -17,6 +19,7 @@ export default function AddNote() {
     const colors: ColorOptions[] = ['#EFCB8C', '#CAC1C6', '#CCD4BF', '#C7CFD1','#EFDBD4'];
                                  //[ yellow,    purple,     green,      blue,     pink ]
 
+    const { addNote } = useNotes();
     const handleDone = () => { 
         const newNote = {
             id: Date.now(),
@@ -27,6 +30,7 @@ export default function AddNote() {
         };
         setNotes(prev => [...prev, newNote]);
 
+        addNote(newNote);
         navigation.goBack();
     };
     return (

@@ -50,7 +50,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
         
         {/* Gem display */}
         <View>
-            <Image source={require('../figma-icons/diamond.png')} className="absolute top-[315px] right-36 w-7 h-7"/>
+            <Image source={require('../figma-icons/diamond.png')} className="absolute top-[315px] right-36 w-7 h-7" resizeMode="contain"/>
             <Text className="absolute top-[315px] right-24 text-xl text-brown">{gems ? gems : 0}</Text>
             <Text className="absolute top-[345px] right-24 text-xl text-brown">gems</Text>
         </View>
@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
             </TouchableOpacity>  
 
             {/* Leaderboard */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('./leaderboard')} >
                 <Image 
                     source={require('../figma-icons/leaderboard.png')}
                     className="w-12 h-12"

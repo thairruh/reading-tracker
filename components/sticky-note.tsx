@@ -3,14 +3,14 @@ import { useNavigation } from 'expo-router';
 import { View, Text, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
 
 type NoteProps = {
-id?: number;
-top?: number;
-left?: number;
+id?: number,
 color?: string,
-label?: string,
+text?: string,
+top?: number,
+left?: number,
 }
 
-export const StickyNote = ( { id, top, left, color, label }: NoteProps ) => {
+export const StickyNote = ( { id, color, text, top, left }: NoteProps ) => {
     const [value, onChangeText] = useState('');
 
     return (
