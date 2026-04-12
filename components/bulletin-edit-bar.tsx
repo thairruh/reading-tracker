@@ -4,10 +4,11 @@ import { StyleSheet, Image, Text, View, Pressable } from "react-native";
 import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
 
 interface EditBarProps {
+    addNotePressed?: () => void;
     donePressed?: () => void;
 }
 
-export const EditBar = ({ donePressed }: EditBarProps) => {
+export const EditBar = ({ addNotePressed, donePressed }: EditBarProps) => {
     const router = useRouter();
 
     return (

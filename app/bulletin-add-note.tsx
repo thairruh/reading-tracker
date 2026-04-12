@@ -2,20 +2,33 @@ import React, { useState } from 'react';
 import { useNavigation } from 'expo-router';
 import { View, Text, Pressable, StyleSheet, TextInput, Image, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { NoteEditBar } from '@/components/bulletin-edit-bar';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StickyNote } from '@/components/sticky-note';
 
 type ColorOptions = '#EFCB8C' | '#CAC1C6' | '#CCD4BF' | '#C7CFD1' | '#EFDBD4';
+
 
 export default function AddNote() {
     const navigation = useNavigation();
     const [selectedColor, setSelectedColor] = useState<ColorOptions>('#EFCB8C');
     const [value, onChangeText] = useState('');
+    const [notes, setNotes] = useState<NoteData[]>([]);
 
     const colors: ColorOptions[] = ['#EFCB8C', '#CAC1C6', '#CCD4BF', '#C7CFD1','#EFDBD4'];
                                  //[ yellow,    purple,     green,      blue,     pink ]
 
-    const handleDone = () => {
-      
-    }
+    const handleDone = () => { 
+        const newNote = {
+            id: Date.now(),
+            text: value,
+            color: selectedColor,
+            top: Math.random() * 400,
+            left: Math.random() * 300,
+        };
+        setNotes(prev => [...prev, newNote]);
+
+        navigation.goBack();
+    };
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <View style={styles.container}>
@@ -31,25 +44,8 @@ export default function AddNote() {
                 </Pressable>
 
                 {/* Sticky note */}
-                <View className="relative w-full h-full items-center top-48">
-                    
-                    
-                            <View className="absolute w-80 h-80 shadow-sm shadow-slate-700" style={{backgroundColor : selectedColor }}>
-                            <TextInput
-                            placeholder="Your text here :)"
-                            placeholderTextColor={'black'}
-                            multiline
-                            // numberOfLines={8}
-                            // maxLength={100}
-                            onChangeText={text => onChangeText(text)}
-                            value={value}
-                            style={styles.text}
-                        />
-                        </View>
-                    
-                    <View className="absolute w-80 h-12" style={{backgroundColor : selectedColor, opacity: 0.3, mixBlendMode: 'multiply'}}>
-
-                    </View>
+                <View className="relative w-full h-full items-center top-48"> 
+                    <StickyNote color={selectedColor}/>
                 </View>
 
                 {/* Buttons to change note color */}
@@ -61,8 +57,8 @@ export default function AddNote() {
                         <Pressable
                             key={color}
                             onPress={() => setSelectedColor(color)}
-                            className={`m-1 w-16 h-16 rounded-full border-2 ${isSelected ?  'border-black' : 'border-transparent'}`}
-
+                            className={`m-1 w-16 h-16 rounded-full shadow-sm shadow-slate-600 border-2 
+                                ${isSelected ?  'border-black' : 'border-transparent'}`}
                             style={{ backgroundColor: color }}
                         />
                     );
@@ -70,9 +66,7 @@ export default function AddNote() {
                 </View> 
 
                 <View className="absolute -bottom-40 m-36">
-                     <NoteEditBar/>
-
-                     <NoteEditBar donePressed={handleDone}/>
+                     <NoteEditBar addNotePressed={handleDone}/>
                 </View>
 
             </View>
