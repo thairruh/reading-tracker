@@ -58,7 +58,7 @@ export default function DeskScreen() {
         {/* Journal on desk */}
         <View className="absolute bottom-12">
             <ImgButton
-            screenName="/" //file name that links to shop
+            screenName="/" //file name that links to journal
             imgSource={require('../figma-icons/desk-journal.png')}
             text=""
             textStyle=""
