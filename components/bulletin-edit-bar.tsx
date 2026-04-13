@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigation, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { StyleSheet, Image, Text, View, Pressable } from "react-native";
 import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
 import { useNotes } from './NoteContext';
@@ -7,16 +7,22 @@ import { useNotes } from './NoteContext';
 interface EditBarProps {
     addNotePressed?: () => void;
     donePressed?: () => void;
+    editPressed?: () => void;
+    deletePressed?: () => void;
     text?: string;
     color?: string;
 }
 
-export const EditBar = ({ addNotePressed, donePressed }: EditBarProps) => {
+export const EditBar = ({ addNotePressed, donePressed, editPressed, deletePressed }: EditBarProps) => {
     const router = useRouter();
 
     return (
         <View className="flex-row absolute bottom-56 w-full">
-            <Pressable style={styles.buttonstyle} className="border-r-hairline">
+            <Pressable 
+                onPress={deletePressed}
+                style={styles.buttonstyle} 
+                className="border-r-hairline"
+            >
                 <Image
                     style={styles.image}
                     source={require('../figma-icons/delete.png')}
@@ -36,7 +42,10 @@ export const EditBar = ({ addNotePressed, donePressed }: EditBarProps) => {
                 <Text style={styles.text}>Add Note</Text>
             </Pressable>
 
-            <Pressable style={styles.buttonstyle} className="border-l-0 border-r-hairline">
+            <Pressable 
+                onPress={editPressed}
+                style={styles.buttonstyle} 
+                className="border-l-0 border-r-hairline">
                 <Image
                     style={styles.image}
                     source={require('../figma-icons/edit.png')}
@@ -73,21 +82,29 @@ export const EditBar = ({ addNotePressed, donePressed }: EditBarProps) => {
 
 export const NoteEditBar = ({ donePressed, text, color }: EditBarProps) => {
     const navigation = useNavigation();
-    const { addNote } = useNotes();
+    const { id } = useLocalSearchParams();
+    const { notes, editNote, addNote } = useNotes();
+    const existingNote = notes.find(n => n.id.toString() === id
+);
+    const [noteText, setNoteText] = useState(existingNote?.text || "");
+    const [noteColor, setNoteColor] = useState(existingNote?.color || '#EFCB8C');
 
     const handleDone = () => { 
+        //If note has id & exists, edit the note's attributes when 'done' is pressed
+        if(id) {
+            editNote(Number(id), {text, color});
+        } else { //Otherwise create a new note
         const newNote = {
             id: Date.now(),
             text: text,
             color: color,
-            top: Math.random() * 400,
-            left: Math.random() * 300,
+            top: Math.floor(Math.random() * (288 - 24 - 20)) + 10,
+            left: Math.floor(Math.random() * (300 - 24 - 20)) + 10,
         };
-
-        addNote(newNote);
-
+            addNote(newNote);
+        }
         navigation.goBack();
-    };
+    };    
 
     return (
         <View className="flex-row absolute bottom-56 w-full">

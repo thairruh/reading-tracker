@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigation } from 'expo-router';
-import { View, Text, Pressable, StyleSheet, TextInput, Image, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Pressable, StyleSheet, TextInput, Image, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { NoteEditBar } from '@/components/bulletin-edit-bar';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StickyNote } from '@/components/sticky-note';
 import { useNotes } from '@/components/NoteContext';
 import { NoteData } from '@/components/NoteContext';
@@ -15,12 +14,13 @@ export default function AddNote() {
     const [selectedColor, setSelectedColor] = useState<ColorOptions>('#EFCB8C');
     const [value, onChangeText] = useState('');
     const [notes, setNotes] = useState<NoteData[]>([]);
+    const [noteText, setNoteText] = useState('');
 
     const colors: ColorOptions[] = ['#EFCB8C', '#CAC1C6', '#CCD4BF', '#C7CFD1','#EFDBD4'];
                                  //[ yellow,    purple,     green,      blue,     pink ]
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
             <View style={styles.container}>
                 <View className="absolute top-0 w-full h-14 bg-bulletin-border"/>
                 <Pressable
@@ -35,14 +35,17 @@ export default function AddNote() {
 
                 {/* Sticky note */}
                 <View className="relative w-full h-full items-center top-48"> 
-                    <StickyNote color={selectedColor}/>
+                    <StickyNote 
+                        color={selectedColor}
+                        changeText={onChangeText}
+                    />
                 </View>
 
                 {/* Buttons to change note color */}
                 <View className="flex-row absolute bottom-80 left-10 w-full">
                 {colors.map((color) => {
                     const isSelected = selectedColor  === color;
-
+                    
                     return (
                         <Pressable
                             key={color}
