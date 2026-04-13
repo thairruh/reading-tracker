@@ -4,11 +4,13 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import shopBtn from '../assets/images/shop_btn.png';
 
-const LowerNav = () => {
+const LowerNav = ({ startEditing }) => {
+
+  
+
   return (
 
     /* REDECORATE AND SHOP BUTTONS*/
-
     <View style={styles.container}>
 
       <View style={{ position: 'absolute',right: 20,bottom: 0,}}>
@@ -23,13 +25,11 @@ const LowerNav = () => {
 
 
       <View style={{ position: 'absolute',right: -30,bottom: -20,}}>
-        <Link href="/" asChild>
-          <Pressable style={styles.outerCircle}>
-            <View style={styles.innerCircle}>
-              <Text className="text-lg mr-2">Redecorate</Text>
-            </View>
-          </Pressable>
-        </Link>
+        <Pressable onPress={startEditing} style={styles.outerCircle}>
+          <View style={styles.innerCircle}>
+            <Text className="text-lg mr-2">Redecorate</Text>
+          </View>
+        </Pressable>
       </View>
       
     </View>
@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 40,
+    zIndex:10,
 
   },
 });
