@@ -1,19 +1,27 @@
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import gem from '../assets/images/gem.png';
 import FavoriteButton from './favorite-btn';
 
 const ShopItem = ({ name, price, image, favorited, onToggleFavorite, onPress }) => {
   return (
     <Pressable style={styles.container} onPress={onPress}>
 
-      <View style={{ alignItems: 'center' }}>
+      <View className="items-center">
           <View style={styles.box}>
               <FavoriteButton favorited={favorited} onPress={onToggleFavorite}/>
               <Image source={image} style={styles.wrapper} className="w-full h-full" resizeMode="contain"/>
           </View>
-            
-          <Text className="mt-1">{name}</Text>
-          <Text>{price}</Text>
+          
+          <View className="mb-5 items-center">
+            <Text className="mt-1">{name}</Text>
+            <View className="flex-row">
+                <Image className="w-4 h-3 mt-1 mr-1" source={gem}/>
+               <Text>{price}</Text>
+            </View>
+           
+          </View>
+          
         </View>
 
     </Pressable>

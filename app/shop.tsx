@@ -9,14 +9,6 @@ import { imageMap } from "../scripts/imageMap";
 import { db } from "../src/firebase/config";
 
 const Shop = () => {
-    
-    /*
-    const [items, setItems] = useState([
-        { id: 1, name: "Poster", price: 10, image: poster, category: "Desk", favorited: false },
-        { id: 2, name: "Mini PC", price: 100, image: miniPC, category: "Desk", favorited: true },
-        { id: 3, name: "Photo", price: 5, image: photo, category: "Desk", favorited: false },
-    ]);
-    */
 
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -87,28 +79,27 @@ const Shop = () => {
         )}
 
             <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.bgBox}>
-                
-                {selectedItem ? (
-                    
-                    <ShopItemInfo
-                        selectedItem={selectedItem}
-                        onClose={() => setSelectedItem(null)}
-                        onToggleFavorite={() => toggleFavorite(selectedItem.id)}
-                    />
-                ) : (
+                    {selectedItem ? (
+                        
+                        <ShopItemInfo
+                            selectedItem={selectedItem}
+                            onClose={() => setSelectedItem(null)}
+                            onToggleFavorite={() => toggleFavorite(selectedItem.id)}
+                        />
+                    ) : (
 
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap'}}>
-                    {filteredItems.map(item => (
-                        <ShopItem 
-                            key={item.id}
-                            {...item} 
-                            image={imageMap[item.image]}
-                            onToggleFavorite={() => toggleFavorite(item.id)}
-                            onPress={() => setSelectedItem(item)}/>
-                    ))}
+                    <View className="flex-row flex-wrap ml-1" >
+                        {filteredItems.map(item => (
+                            <ShopItem 
+                                key={item.id}
+                                {...item} 
+                                image={imageMap[item.image]}
+                                onToggleFavorite={() => toggleFavorite(item.id)}
+                                onPress={() => setSelectedItem(item)}/>
+                        ))}
 
-                </View>
-                )}
+                    </View>
+                    )}
             </ScrollView>
         </View>
     </View>
@@ -130,10 +121,10 @@ const styles = StyleSheet.create({
 
   wrapper: {
     width: '90%',
-    height: '100%',
-
+    height: '80%',
+    
     paddingTop: 10,
-    marginTop: 0,
+    marginTop: 30,
 
   },
 
@@ -143,7 +134,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FBF7F6',
 
     paddingTop: 15,
-
+    
     borderWidth: 1.5,
     borderColor: '#5F382B',
     borderRadius: 7,
