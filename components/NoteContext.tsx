@@ -15,6 +15,7 @@ interface NoteContextType {
     addNote: (newNote: NoteData) => void;
     editNote: (id: number, updatedFields: Partial<NoteData>) => void;
     deleteNote: (id: number) => void;
+    handleNotePosition: (id: number,  x: number, y: number) => void;
 }
 
 const NoteContext = createContext<NoteContextType | undefined>(undefined);
@@ -37,10 +38,14 @@ export const NoteProvider = ( { children }: { children: ReactNode }) => {
     //.filter creates a new list of data without selected note -> "deletes" it
     const deleteNote = (id: number) => {
         setNotes((prevNote) => prevNote.filter((note) => note.id !== id));
+    }; 
+
+    const handleNotePosition = (id: number, x: number, y: number ) => {
+        setNotes((prevNote) => prevNote.map((note) => note.id === id ? {...note, x, y } : note));
     };
 
     return (
-        <NoteContext.Provider value={ {notes, addNote, editNote, deleteNote} }>
+        <NoteContext.Provider value={ {notes, addNote, editNote, deleteNote, handleNotePosition } }>
             { children }
         </NoteContext.Provider>
     );

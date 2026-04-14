@@ -1,11 +1,11 @@
 import { useNavigation, useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Pressable, View, Image, Text, StyleSheet, TouchableWithoutFeedback, Keyboard } from "react-native";
+import React, { useRef, useState } from 'react';
+import { Pressable, View, Image, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Animated, PanResponder } from "react-native";
 import EditBar from '../components/bulletin-edit-bar';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StickyNote } from '@/components/sticky-note';
 import { useNotes } from '@/components/NoteContext';
-
+import { DragNote } from '@/components/DragNote';
 
 interface PositionNote {
   id: number;
@@ -14,7 +14,8 @@ interface PositionNote {
 }
 
 export default function Bulletin() {
-    const navigation = useRouter();
+    const router = useRouter();
+    const navigation = useNavigation();
     const [isVisible, setIsVisible] = React.useState(false);
     const [noteText, setNoteText] = useState('');
     const [selectedNote, setSelectedNote] = useState<number | null>(null);
@@ -27,7 +28,7 @@ export default function Bulletin() {
 
     const editNote = () => {
         if(selectedNote) {
-            navigation.navigate(`/bulletin-add-note?id=${selectedNote}`);
+            router.navigate(`/bulletin-add-note?id=${selectedNote}`);
         }   
     }
     const handleDelete = () => {
@@ -36,24 +37,60 @@ export default function Bulletin() {
             setSelectedNote(null);
         }
     }
+    
+    // const pan = useRef(new Animated.ValueXY()).current;
 
-    // const addNote = () => {
-    //     const newNote = {
-    //         id: Date.now(),
-    //         top: Math.floor(Math.random() * (288 - 80)),
-    //         left: Math.floor(Math.random() * (300 - 80) + 20),
-    //     };
-    //     addNote(newNote);
-    //     setNote(prev => [...prev, newNote]);        
-    // };
+    // const panResponder = useRef(PanResponder.create({
+    //     onMoveShouldSetPanResponder: () => true,
+    //     onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}], {useNativeDriver: false}),
+    //     onPanResponderRelease: () => {
+    //         Animated.spring(
+    //             pan,
+    //             {toValue: { x: 0, y: 0}, useNativeDriver: false}
+    //         ).start();
+    //     },
+    // }),
+    // ).current;
+    //     const pan = useRef(new Animated.ValueXY()).current;
+       
+    //     const panResponder = useRef(PanResponder.create({
+    //         onStartShouldSetPanResponder: () => false,
+    //         onMoveShouldSetPanResponder: (_, gestureState) => {
+    //             return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
+    //         },
+    //         onPanResponderGrant: () => {
+    //             pan.setOffset({
+    //                 x: pan.x._value,
+    //                 y: pan.y._value,
+    //             });
+    //             pan.setValue({ x: 0, y: 0 });
+    //         },
+    //         onPanResponderMove: Animated.event(
+    //             [null, { dx: pan.x, dy: pan.y }],
+    //             {useNativeDriver: false}
+    //         ),
+    //         onPanResponderRelease: () => {
+    //             pan.flattenOffset();
+    //         },
+    //     })
+    // ).current;
+        // const translateY = useRef(new Animated.Value(0)).current;
+        // const DragNote = () => {
+        //     Animated.timing(pan, {
+        //         toValue: {x: 50, y: 50},
+        //         duration: 1000,
+        //         useNativeDriver: true,
+        //     }).start();
+        // };
+    
 
-  const { notes } = useNotes();
+  const { notes, handleNotePosition } = useNotes();
   return (
      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <View className="relative bg-light-pink">
       
         <Pressable
-        onPress={() => navigation.replace('/DeskScreen')}
+        onPress={() => router.replace('/DeskScreen')}
         className="absolute top-16 left-5 "
         >
             <Image 
@@ -76,18 +113,18 @@ export default function Bulletin() {
                     const isSelected = selectedNote === note.id;
 
                     return (
-                   <Pressable 
+                   
+                //    <Pressable 
+                    <DragNote
                         key={note.id}
+                        note={note}
+                        isSelected={isSelected}
                         onPress={() => {
                         setIsVisible(true); 
                         setSelectedNote(note.id); }}
-                        style={{
-                            position: 'absolute',
-                            top: note.top,
-                            left: note.left,
-                            zIndex: isSelected ? 10 : 1, //move selected note to the front
-                        }}
+                        stopDrag={handleNotePosition}
                     >
+
                         { /* Outline selected note */ }
                         <View className={`${isSelected ? 'border-2 border-black' : 'border-transparent'}`}>
                         <StickyNote
@@ -97,7 +134,7 @@ export default function Bulletin() {
                             variant="small"
                          />
                           </View>
-                    </Pressable>
+                          </DragNote>
                     );
                     })}
                 </View>
