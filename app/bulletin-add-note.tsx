@@ -59,7 +59,10 @@ export default function AddNote() {
                 </View> 
 
                 <View className="absolute -bottom-40 m-36">
-                     <NoteEditBar text={value} color={selectedColor}/>
+                     <NoteEditBar 
+                        text={value} 
+                        color={selectedColor}
+                        />
                 </View>
 
             </View>

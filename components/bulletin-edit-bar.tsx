@@ -83,7 +83,8 @@ export const EditBar = ({ addNotePressed, donePressed, editPressed, deletePresse
 export const NoteEditBar = ({ donePressed, text, color }: EditBarProps) => {
     const navigation = useNavigation();
     const { id } = useLocalSearchParams();
-    const { notes, editNote, addNote } = useNotes();
+    const { notes, editNote, addNote, deleteNote } = useNotes();
+    const [selectedNote, setSelectedNote] = useState<number | null>(null);
     const existingNote = notes.find(n => n.id.toString() === id);
 
     const [noteText, setNoteText] = useState(existingNote?.text || "");
@@ -104,22 +105,24 @@ export const NoteEditBar = ({ donePressed, text, color }: EditBarProps) => {
             addNote(newNote);
         }
         navigation.goBack();
-    };    
+    };
 
     return (
-        <View className="flex-row absolute bottom-56 w-full">
-            <Pressable style={styles.buttonstyle} className="border-r-hairline">
+        <View className="absolute bottom-56 w-full">
+            {/* <Pressable 
+                style={styles.buttonstyle} 
+                className="border-r-hairline">
                 <Image
                     style={styles.image}
                     source={require('../figma-icons/delete.png')}
                 />
                 <Text style={styles.text}>Delete</Text>
-            </Pressable>
+            </Pressable> */}
 
             <Pressable  
                 onPress={handleDone} 
-                style={styles.buttonstyle}
-                className="border-l-0"
+                style={styles.done}
+                className=""
             >
                 <Image
                     style={styles.image}
@@ -131,9 +134,71 @@ export const NoteEditBar = ({ donePressed, text, color }: EditBarProps) => {
     );
 }
 
+export const RedecorateEditBar = ({  donePressed }: EditBarProps) => {
+    const router = useRouter();
+
+    return (
+        <View className="flex-row absolute bottom-56 w-full">
+            <Pressable 
+                
+                style={styles.buttonstyle} 
+                className="border-r-hairline"
+            >
+                <Image
+                    style={styles.image}
+                    source={require('../figma-icons/crop_rotate.png')}
+                />
+                <Text style={styles.text}>Rotate</Text>
+            </Pressable>
+
+            <Pressable 
+                
+                style={styles.buttonstyle} 
+                className="border-l-0 border-r-hairline"
+                >
+                <Image
+                    style={styles.image}
+                    source={require('../figma-icons/storage_icon.png')}
+                />                
+                <Text style={styles.text}>Storage</Text>
+            </Pressable>
+
+            <Pressable 
+                style={styles.buttonstyle} 
+                className="border-l-0 border-r-hairline">
+                <Image
+                    style={styles.image}
+                    source={require('../figma-icons/place_item.png')}
+                />                
+                <Text style={styles.text}>Place Item</Text>
+            </Pressable>
+
+            <Pressable  
+                onPress={donePressed} 
+                style={styles.buttonstyle}
+                className="border-l-0"
+            >
+                <Image
+                    style={styles.image}
+                    source={require('../figma-icons/check.png')}
+                />    
+                <Text style={styles.text}>Done</Text>
+            </Pressable>
+
+        </View>
+    );
+}
+
 const styles = StyleSheet.create({
     buttonstyle: {
         width: 65,
+        height: 65,
+        backgroundColor: '#EEDBD3',
+        borderWidth: 2,
+        borderColor: '#472A2A',
+    },
+    done: {
+        width: 150,
         height: 65,
         backgroundColor: '#EEDBD3',
         borderWidth: 2,

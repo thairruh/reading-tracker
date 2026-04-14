@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import React, { use, useEffect, useState } from 'react';
-import { Image, TouchableOpacity, View, Text } from "react-native";
+import { Image, TouchableOpacity, View, Text, Pressable } from "react-native";
 import { ImgButton, NavButton } from '../components/buttons/navButtons';
 import { Sidebar } from './Sidebar';
 import JournalModal from '../components/JournalModal';
@@ -8,11 +8,16 @@ import { Asset } from 'expo-asset';
 import { auth, db } from '@/src/firebase/config';
 import { getUserDocument } from '@/src/firebase/users';
 import { doc, onSnapshot } from 'firebase/firestore';
+import { RedecorateEditBar } from '@/components/bulletin-edit-bar';
+import { StickyNote } from '@/components/sticky-note';
+import { useNotes } from '@/components/NoteContext';
+import { DragNote } from '@/components/DragNote';
 
 export default function DeskScreen() {
     const router = useRouter();
     const [journalVisible, setJournalVisible] = useState(false);
     const [gems, setGems] = useState(0);
+    const [isVisible, setIsVisible] = React.useState(false);
 
     // load journal image into cache for smoother performance when opening journal modal
     useEffect(() => {
@@ -38,6 +43,10 @@ export default function DeskScreen() {
         return unsubscribe;
     }, []);
 
+       const closeEditBar = () => {
+        setIsVisible(false);
+    };
+  const { notes, handleNotePosition } = useNotes();
   return (
     <Sidebar gems={gems}>
     
@@ -47,11 +56,31 @@ export default function DeskScreen() {
 
         {/* Bulletin Board */}
         <View className="absolute top-64 right-3 w-72 h-48 bg-bulletin-board border-8 border-bulletin-border" >
-            <TouchableOpacity 
-                className="flex-1 justify-center items-center"
+            <View className='absolute inset-0'>
+            {notes.map((note) => {
+                return (
+                <DragNote
+                key={note.id}
+                note={note}
+                isSelected={false}
+                onPress={() => router.replace('/Bulletin')}
+                stopDrag={handleNotePosition}
+                >
+                <StickyNote
+                    isEditable={false}
+                    key={note.id}
+                    {...note}
+                    variant='mini'
+                />
+                
+                </DragNote>
+                );
+            })}
+            </View>
+            <Pressable 
+                className="flex-1 justify-center items-center z-10"
                 onPress ={() => router.replace('./Bulletin')}>
-
-            </TouchableOpacity>
+            </Pressable>
         </View>
 
         {/* Desk */}
@@ -144,6 +173,7 @@ export default function DeskScreen() {
 
         { /* 'Redecorate' Button */ }
         <View className="absolute bottom-44 right-[150px]">
+
             <NavButton 
             text="Redecorate" 
             screenName="/"      //file name for redecorating
@@ -151,6 +181,7 @@ export default function DeskScreen() {
             textStyle=""
             innerCircle="absolute bg-peach w-44 h-44"
             />
+
         </View>
 
     </View>

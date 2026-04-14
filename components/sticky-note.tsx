@@ -8,7 +8,7 @@ color: string,
 text?: string,
 top?: number,
 left?: number,
-variant?: 'large' | 'small',
+variant?: 'large' | 'small' | 'mini',
 style?: StyleProp<ViewStyle>;
 isEditable?: boolean,
 changeText?: (value: string) => void; 
@@ -19,9 +19,9 @@ export const StickyNote = ( { id, color, text, top, left, variant='large', isEdi
     // const size = variant == 'small' ? 'w-40 h-40' : 'w-80 h-80';
     // const shadingSize = variant == 'small' ? 'w-40 h-8' : 'w-80 h-12';
     const scale = variant === 'small' ? 0.3 : 1;
-    const size = variant === 'small' ? 100 : 320;
-    const shadingSize = variant === 'small' ? 15 : 48;
-    const fontSize = variant === 'small' ? 8 : 20;
+    const size = variant === 'mini' ? 32 : variant === 'small' ? 64 : 320;
+    const shadingSize = variant === 'mini' ? 5 : variant === 'small' ? 10 : 48;
+    const fontSize = variant === 'mini' ? 4 : variant === 'small' ? 8 : 20;
 
     return (
         <View className="relative w-full h-full items-center">
@@ -64,6 +64,6 @@ const styles = StyleSheet.create ({
         fontSize: 20,
         padding: 5,
         marginTop: 45,
-        marginLeft: 5,
+        marginLeft: 2,
     },
 })

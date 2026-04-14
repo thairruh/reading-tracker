@@ -38,51 +38,6 @@ export default function Bulletin() {
         }
     }
     
-    // const pan = useRef(new Animated.ValueXY()).current;
-
-    // const panResponder = useRef(PanResponder.create({
-    //     onMoveShouldSetPanResponder: () => true,
-    //     onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}], {useNativeDriver: false}),
-    //     onPanResponderRelease: () => {
-    //         Animated.spring(
-    //             pan,
-    //             {toValue: { x: 0, y: 0}, useNativeDriver: false}
-    //         ).start();
-    //     },
-    // }),
-    // ).current;
-    //     const pan = useRef(new Animated.ValueXY()).current;
-       
-    //     const panResponder = useRef(PanResponder.create({
-    //         onStartShouldSetPanResponder: () => false,
-    //         onMoveShouldSetPanResponder: (_, gestureState) => {
-    //             return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
-    //         },
-    //         onPanResponderGrant: () => {
-    //             pan.setOffset({
-    //                 x: pan.x._value,
-    //                 y: pan.y._value,
-    //             });
-    //             pan.setValue({ x: 0, y: 0 });
-    //         },
-    //         onPanResponderMove: Animated.event(
-    //             [null, { dx: pan.x, dy: pan.y }],
-    //             {useNativeDriver: false}
-    //         ),
-    //         onPanResponderRelease: () => {
-    //             pan.flattenOffset();
-    //         },
-    //     })
-    // ).current;
-        // const translateY = useRef(new Animated.Value(0)).current;
-        // const DragNote = () => {
-        //     Animated.timing(pan, {
-        //         toValue: {x: 50, y: 50},
-        //         duration: 1000,
-        //         useNativeDriver: true,
-        //     }).start();
-        // };
-    
 
   const { notes, handleNotePosition } = useNotes();
   return (
@@ -113,8 +68,6 @@ export default function Bulletin() {
                     const isSelected = selectedNote === note.id;
 
                     return (
-                   
-                //    <Pressable 
                     <DragNote
                         key={note.id}
                         note={note}
@@ -124,7 +77,6 @@ export default function Bulletin() {
                         setSelectedNote(note.id); }}
                         stopDrag={handleNotePosition}
                     >
-
                         { /* Outline selected note */ }
                         <View className={`${isSelected ? 'border-2 border-black' : 'border-transparent'}`}>
                         <StickyNote
@@ -135,7 +87,7 @@ export default function Bulletin() {
                          />
                           </View>
                           </DragNote>
-                    );
+                        );
                     })}
                 </View>
             </View>
@@ -143,14 +95,14 @@ export default function Bulletin() {
              {/* Make Edit Bar visible when bulletin is pressed */}
             {isVisible && (
                 <View className="flex-row absolute bottom-0 ml-10 w-full h-full">
-                    <EditBar/>
+                    <EditBar  donePressed={closeEditBar}/>
 
-                    {/* If a note is selected while edit bar is visible */}
+                    {/* Allow these actions if a note is selected while edit bar is visible */}
                     {selectedNote && (
                         <EditBar 
                             deletePressed={handleDelete}
                             editPressed={editNote} 
-                            donePressed={closeEditBar} 
+                            donePressed={closeEditBar}
                         />
                     )}
                     
