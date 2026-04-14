@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigation } from 'expo-router';
-import { View, Pressable, StyleSheet, TextInput, Image, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { View, Pressable, StyleSheet, TextInput, Image, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import { NoteEditBar } from '@/components/bulletin-edit-bar';
 import { StickyNote } from '@/components/sticky-note';
 import { useNotes } from '@/components/NoteContext';
 import { NoteData } from '@/components/NoteContext';
+import { auth } from '@/src/firebase/config';
+import { addStickyNote, updateStickyNoteText } from '@/src/firebase/stickynotes';
 
 type ColorOptions = '#EFCB8C' | '#CAC1C6' | '#CCD4BF' | '#C7CFD1' | '#EFDBD4';
 
@@ -15,9 +17,47 @@ export default function AddNote() {
     const [value, onChangeText] = useState('');
     const [notes, setNotes] = useState<NoteData[]>([]);
     const [noteText, setNoteText] = useState('');
+    
+    const params = useLocalSearchParams<{ boardOwnerUid: string; id?: string }>();
 
     const colors: ColorOptions[] = ['#EFCB8C', '#CAC1C6', '#CCD4BF', '#C7CFD1','#EFDBD4'];
                                  //[ yellow,    purple,     green,      blue,     pink ]
+
+    const currentUser = auth.currentUser;
+    const boardOwnerUid = params.boardOwnerUid || currentUser?.uid;
+    const noteId = params.id;
+
+    const handleSave = async () => {
+        try {
+            if (!currentUser || !boardOwnerUid) {
+                Alert.alert('Error', 'Missing user info.');
+                return;
+            }
+
+            const trimmed = value.trim();
+            if (!trimmed) {
+                Alert.alert('Error', 'Note cannot be empty.');
+                return;
+            }
+
+            if (noteId) {
+                await updateStickyNoteText(boardOwnerUid, noteId, trimmed, selectedColor);
+            } else {
+                await addStickyNote(boardOwnerUid, {
+                    text: trimmed,
+                    color: selectedColor,
+                    authorUid: currentUser.uid,
+                    top: 20,
+                    left: 20,
+                });
+            }
+            navigation.goBack();
+        } catch (error) {
+            console.error('Error saving note:', error);
+            Alert.alert('Error', 'Could not save note.');
+        }
+    };
+
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
@@ -59,7 +99,7 @@ export default function AddNote() {
                 </View> 
 
                 <View className="absolute -bottom-40 m-36">
-                     <NoteEditBar text={value} color={selectedColor}/>
+                     <NoteEditBar onSave={handleSave}/>
                 </View>
 
             </View>

@@ -1,11 +1,13 @@
 import { useNavigation, useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, View, Image, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Animated, PanResponder } from "react-native";
 import EditBar from '../components/bulletin-edit-bar';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StickyNote } from '@/components/sticky-note';
 import { useNotes } from '@/components/NoteContext';
 import { DragNote } from '@/components/DragNote';
+import { auth } from '@/src/firebase/config';
+import { subscribeToStickyNotes, deleteStickyNote, updateStickyNotePosition } from '@/src/firebase/stickynotes';
 
 interface PositionNote {
   id: number;
@@ -18,8 +20,19 @@ export default function Bulletin() {
     const navigation = useNavigation();
     const [isVisible, setIsVisible] = React.useState(false);
     const [noteText, setNoteText] = useState('');
-    const [selectedNote, setSelectedNote] = useState<number | null>(null);
+    const [selectedNote, setSelectedNote] = useState<string | null>(null);
     const { deleteNote } = useNotes();
+    const [notes, setNotes] = useState<any[]>([]);
+
+    const currentUser = auth.currentUser;
+    const boardOwnerUid = currentUser?.uid;
+
+    useEffect(() => {
+        if (!boardOwnerUid) return;
+
+        const unsubscribe = subscribeToStickyNotes(boardOwnerUid, setNotes);
+        return unsubscribe;
+    }, [boardOwnerUid]);
 
     const closeEditBar = () => {
         setIsVisible(false);
@@ -27,16 +40,20 @@ export default function Bulletin() {
     };
 
     const editNote = () => {
-        if(selectedNote) {
-            router.navigate(`/bulletin-add-note?id=${selectedNote}`);
-        }   
-    }
-    const handleDelete = () => {
-        if(selectedNote) {
-            deleteNote(selectedNote);
+        if (selectedNote && boardOwnerUid) {
+        router.navigate({
+            pathname: "/bulletin-add-note",
+            params: { boardOwnerUid, id: selectedNote },
+        });
+        }
+    };
+
+    const handleDelete = async () => {
+        if(selectedNote && boardOwnerUid) {
+            await deleteStickyNote(boardOwnerUid, selectedNote);
             setSelectedNote(null);
         }
-    }
+    };
     
     // const pan = useRef(new Animated.ValueXY()).current;
 
@@ -84,7 +101,15 @@ export default function Bulletin() {
         // };
     
 
-  const { notes, handleNotePosition } = useNotes();
+    const handleNotePosition = async (
+        noteId: string,
+        top: number,
+        left: number
+    ) => {
+        if (!boardOwnerUid) return;
+        await updateStickyNotePosition(boardOwnerUid, noteId, top, left);
+    };
+
   return (
      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <View className="relative bg-light-pink">
@@ -120,8 +145,9 @@ export default function Bulletin() {
                         note={note}
                         isSelected={isSelected}
                         onPress={() => {
-                        setIsVisible(true); 
-                        setSelectedNote(note.id); }}
+                            setIsVisible(true); 
+                            setSelectedNote(note.id); 
+                        }}
                         stopDrag={handleNotePosition}
                     >
 
@@ -129,7 +155,6 @@ export default function Bulletin() {
                         <View className={`${isSelected ? 'border-2 border-black' : 'border-transparent'}`}>
                         <StickyNote
                             isEditable={false}
-                            key={note.id} 
                             {...note}
                             variant="small"
                          />
@@ -143,19 +168,25 @@ export default function Bulletin() {
              {/* Make Edit Bar visible when bulletin is pressed */}
             {isVisible && (
                 <View className="flex-row absolute bottom-0 ml-10 w-full h-full">
-                    <EditBar/>
-
-                    {/* If a note is selected while edit bar is visible */}
-                    {selectedNote && (
-                        <EditBar 
-                            deletePressed={handleDelete}
-                            editPressed={editNote} 
-                            donePressed={closeEditBar} 
-                        />
+                    {!selectedNote ? (
+                    <EditBar
+                        addNotePressed={() =>
+                        router.navigate({
+                            pathname: "/bulletin-add-note",
+                            params: { boardOwnerUid },
+                        })
+                        }
+                        donePressed={closeEditBar}
+                    />
+                    ) : (
+                    <EditBar
+                        deletePressed={handleDelete}
+                        editPressed={editNote}
+                        donePressed={closeEditBar}
+                    />
                     )}
-                    
                 </View>
-            )}
+                )}
           
 
             
