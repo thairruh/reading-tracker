@@ -84,8 +84,8 @@ export const NoteEditBar = ({ donePressed, text, color }: EditBarProps) => {
     const navigation = useNavigation();
     const { id } = useLocalSearchParams();
     const { notes, editNote, addNote } = useNotes();
-    const existingNote = notes.find(n => n.id.toString() === id
-);
+    const existingNote = notes.find(n => n.id.toString() === id);
+
     const [noteText, setNoteText] = useState(existingNote?.text || "");
     const [noteColor, setNoteColor] = useState(existingNote?.color || '#EFCB8C');
 
@@ -98,8 +98,8 @@ export const NoteEditBar = ({ donePressed, text, color }: EditBarProps) => {
             id: Date.now(),
             text: text,
             color: color,
-            top: Math.floor(Math.random() * (288 - 24 - 20)) + 10,
-            left: Math.floor(Math.random() * (300 - 24 - 20)) + 10,
+            // top: Math.floor(Math.random() * (288 - 24 - 20)) + 10,
+            // left: Math.floor(Math.random() * (300 - 24 - 20)) + 10,
         };
             addNote(newNote);
         }
