@@ -61,31 +61,31 @@ const AddBook = ({ setBook, onClose }) => {
             </View> 
 
             <Pressable onPress={onClose}> 
-                <Image source={x} style={{position: 'absolute', bottom: 570, left: '-45%'}}/> 
+                <Image source={x} className="absolute bottom-[570px] right-[135px]"/> 
             </Pressable> 
 
             <Text style={styles.title}>Add Book</Text> 
             
 
             {/* FORM INPUTS */}
-            <View style={{flexDirection: 'row', position: 'absolute', top: 125}}> 
+            <View className="flex-row absolute top-[125px]"> 
                 <Text style={styles.font}>Title:</Text> 
                 <TextInput style={styles.input} placeholder="Type here..." onChangeText={newText => setTitle(newText)} value={title} /> 
             </View> 
 
-            <View style={{flexDirection: 'row', position: 'absolute', top: 220}}> 
+            <View className="flex-row absolute top-[220px]"> 
                 <Text style={styles.font}>Start Date:</Text> 
                 <TextInput style={styles.input} placeholder="Type here..." onChangeText={newText => setStart(newText)} value={start} /> 
             </View> 
 
-            <View style={{flexDirection: 'row', position: 'absolute', top: 315}}> 
+            <View className="flex-row absolute top-[315px]"> 
                 <Text style={styles.font}>Finish Date:</Text> 
                 <TextInput style={styles.input} placeholder="  Type here..." onChangeText={newText => setFinish(newText)} value={finish} /> 
             </View> 
             
             {/* CHECKBOXES*/} 
-            <View style={{flexDirection: 'row', position: 'absolute', top: 415}}> 
-                <Text style={{marginRight: 20, fontSize: 20,}}>Completed</Text> 
+            <View className="flex-row absolute top-[415px]"> 
+                <Text className="mr-[20px] text-[20px]" >Completed</Text> 
                 <Checkbox 
                     style={styles.checkbox} 
                     value={isCompleted} 
@@ -95,7 +95,7 @@ const AddBook = ({ setBook, onClose }) => {
                     }}
                     color={isCompleted ? '#F4B7B7' : '#472A2A'} /
                 > 
-                <Text style={{marginRight: 20, marginLeft: 40, fontSize: 20,}}>Dropped</Text> 
+                <Text className="mr-[20px] ml-[40px] text-[20px]" >Dropped</Text> 
                 <Checkbox 
                     style={styles.checkbox} 
                     value={isDropped} 
@@ -128,6 +128,12 @@ const styles = StyleSheet.create({
         alignItems: 'center', 
         borderWidth: 1, 
         marginTop: 150, 
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        elevation: 5,
+        overflow: 'hidden',
     }, 
     paperLine: { 
         width: '100%', 

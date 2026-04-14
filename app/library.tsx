@@ -1,7 +1,8 @@
 import AddBook from '@/components/add-book';
 import CustomHeader from '@/components/banner';
-import React, { useState } from 'react';
-import { Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import ViewBook from '@/components/library-book-info';
+import React, { useMemo, useState } from 'react';
+import { Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import plusIcon from '../assets/images/plusIcon.png';
 
 const Library = () => {
@@ -24,20 +25,23 @@ const Library = () => {
   const requiredShelves = Math.ceil(totalItems / booksPerShelf);
   const shelfCount = Math.max(4, requiredShelves);
 
-  const shelves = [];
-
   // splits the books into chucks for each shelf
+  const shelves = useMemo(() => {
+  const result = [];
   for (let i = 0; i < shelfCount; i++) {
     const start = i * booksPerShelf;
     const end = start + booksPerShelf;
-    shelves.push(book.slice(start, end));
+    result.push(book.slice(start, end));
   }
+  return result;
+  }, [book, shelfCount, booksPerShelf]);
 
   // determine in the plus goes on the same shelf or next
   const plusIndex = book.length;
   const plusShelfIndex = Math.floor(plusIndex / booksPerShelf);
 
-  
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [viewBook, setViewBook] = useState(false);
 
   return (
     <ScrollView style={styles.container}>
@@ -45,11 +49,15 @@ const Library = () => {
 
       {shelves.map((shelfBooks, shelfIndex) => (
         <View key={shelfIndex} style={styles.shelf}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', position: 'absolute', bottom: 0 }}>
+          <View className="flex-row items-end absolute bottom-0">
             
             {shelfBooks.map(item => (
-              <View
+              <TouchableOpacity
                 key={item.id}
+                onPress={() => {
+                  setSelectedBook(item);
+                  setViewBook(true);
+                }}
                 style={[
                   styles.book,
                   {
@@ -65,7 +73,7 @@ const Library = () => {
             {shelfIndex === plusShelfIndex && (
               <View style={styles.transparentBox}>
                 <Pressable onPress={() => setShow(true)}>
-                  <Image source={plusIcon} style={{ marginTop: 5}}/>
+                  <Image source={plusIcon} className="mt-1.5"/>
                 </Pressable>
               </View>
             )}
@@ -76,6 +84,20 @@ const Library = () => {
 
       <Modal visible={show} transparent>
         <AddBook setBook={setBook} onClose={() => setShow(false)} />
+      </Modal>
+
+      <Modal visible={viewBook} transparent>
+        {selectedBook && (
+          <ViewBook
+            title={selectedBook.title}
+            start={selectedBook.start}
+            finish={selectedBook.finish}
+            status={selectedBook.status}
+            onClose={() => {
+              setViewBook(false)
+              setSelectedBook(null);}}
+          />
+        )}
       </Modal>
 
     </ScrollView>
