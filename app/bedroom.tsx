@@ -97,7 +97,7 @@ const Bedroom = () => {
 
 
     <Pressable disabled={!isEditing} onPress={() => switchStyle('floor')}>
-      <Image source={floor} style={styles.floor} contentFit="contain"/>
+      <Image source={displayItems.floor} style={styles.floor} contentFit="contain"/>
     </Pressable>
 
     <Pressable disabled={!isEditing} onPress={() => switchStyle('bed')}>
@@ -192,13 +192,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 250,
     width: '100%',
-    height: '100%',
+    height: 620,
   },
   bed: {
     width: '70%',
-    height: '40%',
+    height: 300,
     position: 'absolute',
-    top: 465,
+    top: 330,
     left: 0,
     zIndex: 1
   },
