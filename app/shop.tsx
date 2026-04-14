@@ -1,27 +1,55 @@
 import ShopItem from '@/components/shop-item';
 import ShopItemInfo from '@/components/shop-item-info';
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import miniPC from '../assets/images/desk/Blue-desk-mini-comp.png';
-import poster from '../assets/images/desk/Desk-wall-photos.png';
-import photo from '../assets/images/desk/White-frame-desk-photo.png';
+import { collection, getDocs } from "firebase/firestore";
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import CustomHeader from '../components/banner';
 import Tabs from '../components/tabs';
+import { imageMap } from "../scripts/imageMap";
+import { db } from "../src/firebase/config";
 
-const DeskShop = () => {
-
+const Shop = () => {
+    
+    /*
     const [items, setItems] = useState([
         { id: 1, name: "Poster", price: 10, image: poster, category: "Desk", favorited: false },
         { id: 2, name: "Mini PC", price: 100, image: miniPC, category: "Desk", favorited: true },
         { id: 3, name: "Photo", price: 5, image: photo, category: "Desk", favorited: false },
     ]);
+    */
 
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('Desk');
+    const [selectedItem, setSelectedItem] = useState(null);
+
+    // get shop items from database
+    useEffect(() => {
+        const fetchShopItems = async () => {
+            const snapshot = await getDocs(collection(db, 'shopItems'))
+            
+            const data = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+
+            setItems(data);
+            setLoading(false);
+        };
+        fetchShopItems();
+    }, []);
+
+    if (loading) return <Text>Loading shop...</Text>
+
+    // Tabs Filtering
 
     const filteredItems = items.filter(item => {
         if (activeTab === 'Favorites') return item.favorited;
         return item.category === activeTab;
     });
+
+
+    /*
 
     const toggleFavorite = (id) => {
         setItems(prev =>
@@ -31,15 +59,14 @@ const DeskShop = () => {
                     : item
             )
         );
-
+        
         setSelectedItem(prev =>
             prev && prev.id === id
             ? { ...prev, favorited: !prev.favorited }
             : prev
         );
-    };
-
-    const [selectedItem, setSelectedItem] = useState(null);
+    */
+    
 
   return (
     <View style={styles.container}>
@@ -75,9 +102,11 @@ const DeskShop = () => {
                         <ShopItem 
                             key={item.id}
                             {...item} 
+                            image={imageMap[item.image]}
                             onToggleFavorite={() => toggleFavorite(item.id)}
                             onPress={() => setSelectedItem(item)}/>
                     ))}
+
                 </View>
                 )}
             </ScrollView>
@@ -89,6 +118,7 @@ const DeskShop = () => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
@@ -99,8 +129,8 @@ const styles = StyleSheet.create({
   },
 
   wrapper: {
-    width: 365,
-    height: 720,
+    width: '90%',
+    height: '100%',
 
     paddingTop: 10,
     marginTop: 0,
@@ -108,7 +138,7 @@ const styles = StyleSheet.create({
   },
 
   bgBox: {
-    width: 365,
+    width: '100%',
     height: 720,
     backgroundColor: '#FBF7F6',
 
@@ -122,4 +152,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default DeskShop;
+export default Shop;
