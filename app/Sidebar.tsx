@@ -72,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
                 <Text className="left-5 font-bold text-2xl text-brown">Profile</Text>
             </TouchableOpacity>
             {/* Settings */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/settings')} >
                 <Image 
                     source={require('../figma-icons/settings.png')}
                     className="w-12 h-12"
