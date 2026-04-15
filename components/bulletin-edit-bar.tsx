@@ -8,12 +8,13 @@ interface EditBarProps {
     addNotePressed?: () => void;
     donePressed?: () => void;
     editPressed?: () => void;
+    stickersPressed?: () => void;
     deletePressed?: () => void;
     text?: string;
     color?: string;
 }
 
-export const EditBar = ({ addNotePressed, donePressed, editPressed, deletePressed }: EditBarProps) => {
+export const EditBar = ({ addNotePressed, donePressed, editPressed, stickersPressed, deletePressed }: EditBarProps) => {
     const router = useRouter();
 
     return (
@@ -54,6 +55,7 @@ export const EditBar = ({ addNotePressed, donePressed, editPressed, deletePresse
             </Pressable>
 
             <Pressable 
+                onPress={stickersPressed}
                 style={styles.buttonstyle} 
                 className="border-l-0 border-r-hairline"
                 >
