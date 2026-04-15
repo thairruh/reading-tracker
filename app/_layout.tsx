@@ -7,6 +7,7 @@ import "react-native-reanimated";
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { NoteProvider } from '@/components/NoteContext';
+import { StickerProvider } from '@/components/StickerContext';
 
 
 export const unstable_settings = {
@@ -17,6 +18,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
+    <StickerProvider>
     <NoteProvider>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
@@ -30,5 +32,6 @@ export default function RootLayout() {
       <StatusBar translucent backgroundColor="transparent" />
     </ThemeProvider>
     </NoteProvider>
+    </StickerProvider>
   );
 }

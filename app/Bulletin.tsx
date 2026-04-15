@@ -8,6 +8,8 @@ import { useNotes } from '@/components/NoteContext';
 import { DragNote } from '@/components/DragNote';
 import sticker1 from '../assets/stickers/first-entry.png';
 import sticker2 from '../assets/stickers/first-friend.png';
+import AddSticker from '@/components/add-sticker';
+import { useStickers } from '@/components/StickerContext';
 
 interface PositionNote {
   id: number;
@@ -29,14 +31,16 @@ export default function Bulletin() {
     const [selectedNote, setSelectedNote] = useState<number | null>(null);
     const [stickerVisible, setStickerVisible] = useState(false);
     const [selectedSticker, setSelectedSticker] = useState<number | null>(null);
-    const [sticker, setSticker] = useState<StickerData[]>([]);
+    //const [stickers, setStickers] = useState<StickerData[]>([]);
     
     const { deleteNote } = useNotes();
+    const { deleteSticker, addSticker } = useStickers();
 
     const closeEditBar = () => {
         setIsVisible(false);
         setStickerVisible(false);
         setSelectedNote(null);
+        setSelectedSticker(null);
     };
 
     const editNote = () => {
@@ -50,7 +54,7 @@ export default function Bulletin() {
             setSelectedNote(null);
         }
         if(selectedSticker) {
-            deleteNote(selectedSticker);
+            deleteSticker(selectedSticker);
             setSelectedSticker(null);
         }
     }
@@ -76,8 +80,18 @@ export default function Bulletin() {
     const showStickers = () => {
         setStickerVisible(true);
     }    
+    const handleStickers = (imgSource: any) => {
+        const newSticker: StickerData = {
+            id: Date.now(),
+            image: imgSource,
+            top: 50,
+            left: 50,
+        };
+       addSticker(newSticker);
+    };
 
   const { notes, handleNotePosition } = useNotes();
+  const { stickers, handleStickerPosition } = useStickers();
   return (
      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <View className="relative bg-light-pink">
@@ -98,6 +112,7 @@ export default function Bulletin() {
             onPress={() => {
                 setIsVisible(true);
                 setSelectedNote(null);
+                setSelectedSticker(null);
             }}
                 className="absolute inset-0 w-full h-72 bg-bulletin-board border-[10px] border-bulletin-border overflow-visible"
             />
@@ -112,46 +127,66 @@ export default function Bulletin() {
                         isSelected={isSelected}
                         onPress={() => {
                         setIsVisible(true); 
-                        setSelectedNote(note.id); }}
+                        setSelectedNote(note.id); 
+                        setSelectedSticker(null);
+                        }}
                         stopDrag={handleNotePosition}
                     >
                         { /* Outline selected note */ }
-                        <View className={`${isSelected ? 'border-2 border-black' : 'border-transparent'}`}>
-                        <StickyNote
-                            isEditable={false}
-                            key={note.id} 
-                            {...note}
-                            variant="small"
-                         />
-                          </View>
-                          </DragNote>
-                        );
-                    })}
-                {sticker.map((item) => (
-                    <View
-                        key={item.id}
-                        style={{
-                        position: 'absolute',
-                        top: item.top,
-                        left: item.left,
-                        zIndex: 5,
-                    }}>
-                        <Image 
-                        source={item.image}
-                        style={{
+                        <View className={`${isSelected ? 'border-2 border-black' : 'border-transparent'} z-10`}>
+                            <StickyNote
+                                isEditable={false}
+                                key={note.id} 
+                                {...note}
+                                variant="small"
+                            />
+                        </View>
+                    </DragNote>
+                    );
+                })}
+
+                { /* Display sticker(s) on bulletin */}
+                {stickers.map((sticker) => {
+                    const isSelected = selectedSticker === sticker.id;
+                    return (
+                        <DragNote
+                            key={sticker.id}
+                            note={sticker}
+                            isSelected={isSelected}
+                            onPress={() => {
+                                setIsVisible(true);
+                                setSelectedSticker(sticker.id);
+                                setSelectedNote(null);
+                            }}
+                            stopDrag={handleStickerPosition}
+                        >
+                        <View
+                            //key={sticker.id}
+                            style={{
+                            //position: 'absolute',
+                            top: sticker.top,
+                            left: sticker.left,
+                            zIndex: 20,
+                        }}>
+                        <View className={`${isSelected ?'border-2 border-black' : 'border-transparent'} z-10`}>
+                            <Image 
+                            source={sticker.image}
+                            style={{
                             width: 60,
                             height: 60,
-                        }}
-                        />
-                    </View>
-                ))}
+                            }}/>
+                            </View>
+                        </View>
+                        </DragNote>
+                    );
+                })}
                 </View>
             </View>
 
              {/* Make Edit Bar visible when bulletin is pressed */}
             {isVisible && (
                 <View className="flex-row absolute bottom-0 ml-10 w-full h-full">
-                    <EditBar  donePressed={closeEditBar} stickersPressed={showStickers}/>
+                    <EditBar  key={selectedSticker || selectedNote} donePressed={closeEditBar} stickersPressed={showStickers}/>
 
                     {/* Allow these actions if a note is selected while edit bar is visible */}
                     {selectedNote && (
@@ -163,51 +198,20 @@ export default function Bulletin() {
                     )}
                     {/* Handling Stickers */}
                     {stickerVisible && (
-                       <View className="absolute ml-0 w-full h-full">
+                        <View className="absolute ml-0 w-full h-full">
                             <View 
-                            style={{ position: 'absolute', width: '88%', height: 100, backgroundColor:'#EEDBD3', marginBottom: 20, flexDirection:'row'}}
-                            className="ml-0 top-44 right-[60px] rounded-[10px] border-hairline border-brown">
-                            {user.stickers.map((sticker) => {
-                                const isSelected = selectedSticker === sticker.id;
-
-                                const addSticker = () => {
-                                    const newSticker: StickerData = {
-                                    id: Date.now(),
-                                    image: sticker.image,
-                                    top: 50,
-                                    left: 50,
-                                    };
-                                    setSticker((prev) => [...prev, newSticker]);
-                                };
-                            
-                                return (
-                                <View key={sticker.id} className={`${isSelected ? 'border-2 border-black' : 'border-transparent'}`}>
-                                <Pressable
-                                    key={sticker.id}
-                                    onPress={addSticker}
-                                >
-                                <Image
-                                    //key={sticker.id}
-                                    source={sticker.image}
-                                    style={{
-                                    //position: 'absolute',
-                                    width: 60,
-                                    height: 60,
-                                    marginLeft: 20,
-                                    marginTop: 20,
-                                    zIndex: 10,
-                                }}/>
-                                </Pressable>
-                                </View>
-                              
-                                );
-                            })}
-                            </View>
-                            
+                                style={{ position: 'absolute', width: '88%', height: 100, backgroundColor:'#EEDBD3', marginBottom: 20, flexDirection:'row'}}
+                                className="ml-0 top-44 right-[60px] rounded-[10px] border-hairline border-brown">
+                        <AddSticker
+                            user={user}
+                            onAdd={handleStickers}
+                        />
+                        </View>
                         </View>
                     )}
                 </View>
-            )};
+                    
+            )}
           
 
             

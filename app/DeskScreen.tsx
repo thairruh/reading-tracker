@@ -12,6 +12,7 @@ import { RedecorateEditBar } from '@/components/bulletin-edit-bar';
 import { StickyNote } from '@/components/sticky-note';
 import { useNotes } from '@/components/NoteContext';
 import { DragNote } from '@/components/DragNote';
+import { useStickers } from '@/components/StickerContext';
 
 export default function DeskScreen() {
     const router = useRouter();
@@ -47,6 +48,7 @@ export default function DeskScreen() {
         setIsVisible(false);
     };
   const { notes, handleNotePosition } = useNotes();
+  const { stickers, handleStickerPosition } = useStickers();
   return (
     <Sidebar gems={gems}>
     
@@ -76,6 +78,35 @@ export default function DeskScreen() {
                 </DragNote>
                 );
             })}
+            
+            { /* Display stickers on desk bulletin*/ }
+            {stickers.map((sticker) => {
+                return (
+                    <DragNote
+                        key={sticker.id}
+                        note={sticker}
+                        isSelected={false}
+                        onPress={() => router.replace('/Bulletin')}
+                        stopDrag={handleStickerPosition}
+                    >
+                        <View
+                            key={sticker.id}
+                            style={{
+                            //position: 'absolute',
+                            top: sticker.top,
+                            left: sticker.left,
+                            zIndex: 20,
+                        }}>
+                            <Image 
+                            source={sticker.image}
+                            style={{
+                            width: 32,
+                            height: 32,
+                            }}/>
+                        </View>
+                    </DragNote>
+                );
+            })}            
             </View>
             <Pressable 
                 className="flex-1 justify-center items-center z-10"

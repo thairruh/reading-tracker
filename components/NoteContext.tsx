@@ -1,5 +1,6 @@
 import React from 'react';
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { ImageSourcePropType } from 'react-native';
 
 export interface NoteData {
     id: number;
