@@ -1,15 +1,15 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import check from '../assets/images/v.png';
 import x from '../assets/images/x.png';
 
-const RedecorateBar = ({ cancelEditing, saveEditing }) => {
+const RedecorateBar = ({ bringForward, pushBack, setOpenInventory, setStoreItem, cancelEditing, saveEditing }) => {
 
   return ( 
 
     <View style={styles.container}>
       
-        <Pressable 
+        <TouchableOpacity 
             onPress={cancelEditing}>
                 
             <View style={{marginLeft: 10}}>
@@ -17,18 +17,42 @@ const RedecorateBar = ({ cancelEditing, saveEditing }) => {
                 <Text>Cancel</Text>
             </View>
       
-        </Pressable>
+        </TouchableOpacity>
+
+        <View style={{height: '80%', width:2, backgroundColor:'#472A2A', opacity: 0.5}}/>
+
+        <TouchableOpacity onPress={pushBack}>
+          <Text>Send Back</Text>
+        </TouchableOpacity>
+
+        <View style={{height: '80%', width:2, backgroundColor:'#472A2A', opacity: 0.5}}/>
+
+        <TouchableOpacity onPress={bringForward}>
+          <Text>Bring Forward</Text>
+        </TouchableOpacity>
+
+        <View style={{height: '80%', width:2, backgroundColor:'#472A2A', opacity: 0.5}}/>
+
+        <TouchableOpacity onPress={() => setStoreItem(true)}>
+          <Text>Store Item</Text>
+        </TouchableOpacity>
+        
+        <View style={{height: '80%', width:2, backgroundColor:'#472A2A', opacity: 0.5}}/>
+
+        <TouchableOpacity onPress={() => setOpenInventory(true)}>
+          <Text>Inventory</Text>
+        </TouchableOpacity>
 
         <View style={{height: '80%', width:2, backgroundColor:'#472A2A', opacity: 0.5}}/>
       
-        <Pressable onPress={saveEditing}>
+        <TouchableOpacity onPress={saveEditing}>
                 
             <View style={{ marginRight: 10}}>
                 <Image source={check} style={{width:30, height:20}}/>
                 <Text>Done</Text>
             </View>
                 
-        </Pressable>
+        </TouchableOpacity>
     </View>
       
   );
@@ -36,7 +60,7 @@ const RedecorateBar = ({ cancelEditing, saveEditing }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '40%',
+    width: '90%',
     height: 60,
     
     backgroundColor: '#EEDBD3',

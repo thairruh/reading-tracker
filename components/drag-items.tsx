@@ -2,63 +2,91 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, PanResponder, Pressable } from 'react-native';
 
 type DragItemProps = {
-    item: any,
-    isSelected: boolean,
-    onPress: () => void;
-    stopDrag: (id: number, newTop: number, newLeft: number) => void;
-    children: React.ReactNode,
-}
+  item: { id: string; x: number; y: number; z?: number };
+  draggable: boolean;
+  selected?: boolean;
+  onPress?: () => void;
+  stopDrag: (id: string, newX: number, newY: number) => void;
+  children: React.ReactNode;
+};
 
-export const DragItem = ({ item, isSelected, onPress, stopDrag, children }: DragItemProps) => {
+export const DragItem = ({
+  item,
+  draggable,
+  selected,
+  onPress,
+  stopDrag,
+  children,
+}: DragItemProps) => {
+  // Initialize once with the item's real position
+  const pan = useRef(new Animated.ValueXY()).current;
 
-    const pan = useRef(new Animated.ValueXY({ x: item.left ?? 50, y: item.top ?? 50 })).current;
-    const stopDragRef = useRef(stopDrag);
+  const stopDragRef = useRef(stopDrag);
 
-    useEffect(() => {
-        stopDragRef.current = stopDrag;
-    }, [stopDrag]);
+  // Keep stopDrag ref fresh to avoid stale closures in panResponder
+  useEffect(() => {
+    stopDragRef.current = stopDrag;
+  }, [stopDrag]);
 
-    //sync positons of items to keep same x and y when switching screens
-    useEffect(() => {
-        pan.setValue({ x: item.x ?? 50, y: item.y ?? 50 });
-    }, [item.x, item.y]);
-           
-    const panResponder = useRef(
-        PanResponder.create({
-            onStartShouldSetPanResponder: () => false,
-            //Start drag if user moves more than 5 pixels
-            onMoveShouldSetPanResponder: (_, gestureState) => {
-            return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
-            },
-            onPanResponderGrant: () => {
-                pan.setOffset({
-                    x: pan.x._value,
-                    y: pan.y._value,
-            });
-                pan.setValue({ x: 0, y: 0 });
-            },
-            onPanResponderMove: Animated.event(
-                [null, { dx: pan.x, dy: pan.y }],
-                {useNativeDriver: false}
-                ),
-            onPanResponderRelease: (e, gestureState) => {
-                pan.flattenOffset();
-                stopDragRef.current?.(item.id, pan.x._value, pan.y._value);
-            },
-        })
-    ).current;
-    return (
-        <Animated.View
-            style={{
-            position: 'absolute',
-            //zIndex: isSelected ? 10 : 1, //move selected item to the front
-            transform: [{ translateX: pan.x}, { translateY: pan.y } ],
-            }}
-            {...panResponder.panHandlers}>
+    // Sync position when changed externally (save/cancel)
+  useEffect(() => {
+    pan.setValue({ x: item.x ?? 50, y: item.y ?? 50 });
+  }, [item.x, item.y]);
 
-            <Pressable onPress={onPress}>
-                { children }
-            </Pressable>
-        </Animated.View>
-    );
-}
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+
+      onPanResponderGrant: () => {
+        // Merge current animated value into the offset,
+        // then zero the value so deltas start clean
+        if (onPress) onPress(); 
+
+        pan.setOffset({ 
+            x: (pan.x as any)._value, 
+            y: (pan.y as any)._value 
+        });
+        pan.setValue({ x: 0, y: 0 });
+      },
+
+      onPanResponderMove: Animated.event(
+        [null, { dx: pan.x, dy: pan.y }],
+        { useNativeDriver: false }
+      ),
+
+      onPanResponderRelease: () => {
+        // adds offset to base value
+        pan.flattenOffset();
+
+        // Read the final position from the animated value
+        const newX = (pan.x as any)._value;
+        const newY = (pan.y as any)._value;
+
+        stopDragRef.current(item.id, newX, newY);
+      },
+    })
+  ).current;
+
+  return (
+    <Animated.View
+      style={[
+      {
+        position: 'absolute',
+        transform: [{ translateX: pan.x }, { translateY: pan.y }],
+        zIndex: item.z ?? 0,
+      },
+      selected && {
+        shadowColor: '#ffe894',
+        shadowOpacity: 1,
+        shadowRadius: 4,
+      },
+    ]}
+      {...(draggable ? panResponder.panHandlers : {})}
+    >
+      <Pressable onPress={onPress}>
+        {children}
+      </Pressable>
+    </Animated.View>
+  );
+};
