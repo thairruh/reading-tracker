@@ -14,6 +14,7 @@ import plainTable from '../assets/images/bedroom/br-plain-table.png';
 import flowerRug from '../assets/images/bedroom/BR-square-rug-lightblue .png';
 import info from '../assets/images/info.png';
 import overlay from '../assets/images/Redecorate-overlay.png';
+import DragItem from '../components/drag-items';
 import CustomHeader from '../components/header';
 import LowerNav from '../components/lowerNav';
 import RedecorateBar from '../components/redecorate-bar';
@@ -23,8 +24,8 @@ const Bedroom = () => {
   const [editingItems, setEditingItems] = useState(null);
 
   const [roomItems, setRoomItems] = useState({
-    bed: plainBed,
-    bookshelf: bookshelf,
+    bed: { image: plainBed, x: 50, y: 400},
+    bookshelf: {image: bookshelf, x: 150, y: 300},
     rug: null,
     table: null,
     wallItem1: null,
@@ -100,9 +101,16 @@ const Bedroom = () => {
       <Image source={displayItems.floor} style={styles.floor} contentFit="contain"/>
     </Pressable>
 
-    <Pressable disabled={!isEditing} onPress={() => switchStyle('bed')}>
+    <DragItem
+      item={{ id: 1, x: 50, y: 400 }}
+      stopDrag={(id, x, y) => {
+        setRoomItems(prev => ({
+          ...prev,
+          bedPosition: { x, y }
+        }));
+    }}>
       <Image source={displayItems.bed} style={styles.bed} contentFit="contain"/>
-    </Pressable>
+    </DragItem>
      
     
     {/*           LiBRARY SHELF
@@ -200,7 +208,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 330,
     left: 0,
-    zIndex: 1
+    zIndex: 1,
   },
   bookshelf: {
     width: 137,
