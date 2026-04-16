@@ -1,9 +1,11 @@
 import Inventory from '@/components/inventory';
 import TransformBar from '@/components/transform-toolbar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import ViewShot, { captureRef } from 'react-native-view-shot';
 import bookshelf from '../assets/images/bedroom/BR-bookshelf-plain.png';
 import floor from '../assets/images/bedroom/BR-floor-wood-light.png';
 import plainBed from '../assets/images/bedroom/Br-plain-bed.png';
@@ -13,7 +15,7 @@ import CustomHeader from '../components/header';
 import LowerNav from '../components/lowerNav';
 import RedecorateBar from '../components/redecorate-bar';
 
-const Bedroom = () => {
+const Bedroom = ({ onSnapshotUpdate}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingItems, setEditingItems] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -187,210 +189,230 @@ const handlePlaceItem = (newItem) => {
     setSelectedItem(null);
   };
 
-  const saveEditing = () => {
+  const viewShotRef = useRef();
+
+  const saveEditing = async () => {
     setRoomItems(editingItems);
     setEditingItems(null);
     setIsEditing(false);
     setSelectedItem(null);
+    
+    setTimeout(async () => {
+      try {
+        const uri = await captureRef(viewShotRef, {
+          format: 'jpg',
+          quality: 0.7,
+        });
+        await AsyncStorage.setItem('bedroom_snapshot', uri);
+      } catch (error) {
+        console.log("Snapshot failed", error);
+      }
+    }, 100);
   };
 
   const displayItems = isEditing && editingItems ? editingItems : roomItems;
 
 
   return (
-    <View style={styles.container}>
+    <ViewShot 
+      ref={viewShotRef} 
+      style={{ flex: 1 }} 
+      options={{ format: "jpg", quality: 0.9 }}
+    >
+      <View style={styles.container}>
 
-      {!isEditing && ( <CustomHeader />)}
+        {!isEditing && ( <CustomHeader />)}
 
-      {/* REDECORATE INSTRUCTIONS BOX */}
-      {isEditing && (
-        <View className="w-[70%] h-[60px] bg-[#EED8D3] self-center mt-[100px]">
-          <View className="flex-row items-center mt-[15px]">
-            <Image source={info} className="w-[24px] h-[24px] ml-[15px]"/>
-            <Text className="ml-2">{"Drag an item to move it.\nChange its style from the inventory."}</Text>
+        {/* REDECORATE INSTRUCTIONS BOX */}
+        {isEditing && (
+          <View className="w-[70%] h-[60px] bg-[#EED8D3] self-center mt-[100px]">
+            <View className="flex-row items-center mt-[15px]">
+              <Image source={info} className="w-[24px] h-[24px] ml-[15px]"/>
+              <Text className="ml-2">{"Drag an item to move it.\nChange its style from the inventory."}</Text>
+            </View>
           </View>
-        </View>
-      )}
-    
-    {/* This makes the left wall darker, so it appears 3D*/}
-    <View style={styles.wall}>
-        <View style={styles.wallOverlay} />
-    </View>
+        )}
+      
+      {/* This makes the left wall darker, so it appears 3D*/}
+      <View style={styles.wall}>
+          <View style={styles.wallOverlay} />
+      </View>
 
-    {/* FLOOR */}
-    <Pressable disabled={!isEditing} pointerEvents="box-none">
-      <Image source={displayItems.floor} style={styles.floor} contentFit="contain"/>
-    </Pressable>
+      {/* FLOOR */}
+      <Pressable disabled={!isEditing} pointerEvents="box-none">
+        <Image source={displayItems.floor} style={styles.floor} contentFit="contain"/>
+      </Pressable>
 
-    {/* BED */}
+      {/* BED */}
+      <DragItem
+        item={{ 
+          id: 'bed', 
+          x: displayItems.bed.x, 
+          y: displayItems.bed.y, 
+          z: displayItems.bed.z, 
+          scaleX: displayItems.bed.scaleX ?? 1, 
+        }}
+        draggable={isEditing}
+        selected={isEditing && selectedItem === 'bed'}
+        onPress={() => setSelectedItem('bed')}
+        stopDrag={(id, x, y) => {
+        if (isEditing) {
+          setEditingItems(prev => ({
+            ...prev,
+            [id]: {...prev[id], x, y}
+          }));
+        }
+      }}
+        >
+          <Image 
+            source={displayItems.bed.image}
+            style={styles.bed} 
+            contentFit="contain"
+        />
+      </DragItem>
+      
+      {/*           LiBRARY SHELF
+          (not clickable in redecorate mode) */}
+
+      <DragItem
+        item={{ 
+          id: 'bookshelf', 
+          x: displayItems.bookshelf.x, 
+          y: displayItems.bookshelf.y, 
+          z: displayItems.bookshelf.z,
+          scaleX: displayItems.bookshelf.scaleX ?? 1,  
+        }}
+        draggable={isEditing}
+        selected={isEditing && selectedItem === 'bookshelf'}
+        onPress={() => setSelectedItem('bookshelf')}
+        stopDrag={(id, x, y) => {
+          if (isEditing) {
+            setEditingItems(prev => ({
+              ...prev,
+              [id]: { ...prev[id], x, y}
+            }));
+          }
+        }}
+        >
+        <View>
+          <Link href="./library" asChild>
+            <Pressable disabled={isEditing}>
+              <Image source={displayItems.bookshelf.image} style={styles.bookshelf}/>
+            </Pressable>
+          </Link>
+      </View>
+      </DragItem>
+
+      {/* RUG */}
+  {displayItems.rug.image && (
     <DragItem
       item={{ 
-        id: 'bed', 
-        x: displayItems.bed.x, 
-        y: displayItems.bed.y, 
-        z: displayItems.bed.z, 
-        scaleX: displayItems.bed.scaleX ?? 1, 
+        id: 'rug', 
+        x: displayItems.rug.x, 
+        y: displayItems.rug.y, 
+        z: displayItems.rug.z,
+        scaleX: displayItems.rug.scaleX ?? 1,
       }}
       draggable={isEditing}
-      selected={isEditing && selectedItem === 'bed'}
-      onPress={() => setSelectedItem('bed')}
-      stopDrag={(id, x, y) => {
-      if (isEditing) {
-        setEditingItems(prev => ({
-          ...prev,
-          [id]: {...prev[id], x, y}
-        }));
-      }
-    }}
-      >
-        <Image 
-          source={displayItems.bed.image}
-          style={styles.bed} 
-          contentFit="contain"
-      />
-    </DragItem>
-    
-    {/*           LiBRARY SHELF
-        (not clickable in redecorate mode) */}
-
-    <DragItem
-      item={{ 
-        id: 'bookshelf', 
-        x: displayItems.bookshelf.x, 
-        y: displayItems.bookshelf.y, 
-        z: displayItems.bookshelf.z,
-        scaleX: displayItems.bookshelf.scaleX ?? 1,  
-      }}
-      draggable={isEditing}
-      selected={isEditing && selectedItem === 'bookshelf'}
-      onPress={() => setSelectedItem('bookshelf')}
+      selected={isEditing && selectedItem === 'rug'}
+      onPress={() => setSelectedItem('rug')}
       stopDrag={(id, x, y) => {
         if (isEditing) {
           setEditingItems(prev => ({
             ...prev,
-            [id]: { ...prev[id], x, y}
+            [id]: { ...prev[id], x, y }
           }));
         }
       }}
-      >
-      <View>
-        <Link href="./library" asChild>
-          <Pressable disabled={isEditing}>
-            <Image source={displayItems.bookshelf.image} style={styles.bookshelf}/>
-          </Pressable>
-        </Link>
-    </View>
+    >
+      <Image source={displayItems.rug.image} style={{width:300, height:300}}contentFit="contain" />
     </DragItem>
+  )}
 
-    {/* RUG */}
-{displayItems.rug.image && (
-  <DragItem
-    item={{ 
-      id: 'rug', 
-      x: displayItems.rug.x, 
-      y: displayItems.rug.y, 
-      z: displayItems.rug.z,
-      scaleX: displayItems.rug.scaleX ?? 1,
-    }}
-    draggable={isEditing}
-    selected={isEditing && selectedItem === 'rug'}
-    onPress={() => setSelectedItem('rug')}
-    stopDrag={(id, x, y) => {
-      if (isEditing) {
-        setEditingItems(prev => ({
-          ...prev,
-          [id]: { ...prev[id], x, y }
-        }));
-      }
-    }}
-  >
-    <Image source={displayItems.rug.image} style={{width:300, height:300}}contentFit="contain" />
-  </DragItem>
-)}
+  {/* TABLE */}
+  {displayItems.table.image && (
+    <DragItem
+      item={{ 
+        id: 'table', 
+        x: displayItems.table.x, 
+        y: displayItems.table.y, 
+        z: displayItems.table.z,
+        scaleX: displayItems.table.scaleX ?? 1,
+      }}
+      draggable={isEditing}
+      selected={isEditing && selectedItem === 'table'}
+      onPress={() => setSelectedItem('table')}
+      stopDrag={(id, x, y) => {
+        if (isEditing) {
+          setEditingItems(prev => ({
+            ...prev,
+            [id]: { ...prev[id], x, y }
+          }));
+        }
+      }}
+    >
+      <Image source={displayItems.table.image} style={{width:300, height:200}} contentFit="contain" />
+    </DragItem>
+  )}
 
-{/* TABLE */}
-{displayItems.table.image && (
-  <DragItem
-    item={{ 
-      id: 'table', 
-      x: displayItems.table.x, 
-      y: displayItems.table.y, 
-      z: displayItems.table.z,
-      scaleX: displayItems.table.scaleX ?? 1,
-    }}
-    draggable={isEditing}
-    selected={isEditing && selectedItem === 'table'}
-    onPress={() => setSelectedItem('table')}
-    stopDrag={(id, x, y) => {
-      if (isEditing) {
-        setEditingItems(prev => ({
-          ...prev,
-          [id]: { ...prev[id], x, y }
-        }));
-      }
-    }}
-  >
-    <Image source={displayItems.table.image} style={{width:300, height:200}} contentFit="contain" />
-  </DragItem>
-)}
-
-    {displayItems.wallItems &&
-      Object.values(displayItems.wallItems).map(item => (
-        <DragItem
-          key={item.id}
-          item={item}
-          draggable={isEditing}
-          selected={selectedItem === item.id}
-          onPress={() => setSelectedItem(item.id)}
-          stopDrag={(id, x, y) => {
-            setEditingItems(prev => ({
-              ...prev,
-              wallItems: {
-                ...prev.wallItems,
-                [id]: {
-                  ...prev.wallItems[id],
-                  x,
-                  y,
+      {displayItems.wallItems &&
+        Object.values(displayItems.wallItems).map(item => (
+          <DragItem
+            key={item.id}
+            item={item}
+            draggable={isEditing}
+            selected={selectedItem === item.id}
+            onPress={() => setSelectedItem(item.id)}
+            stopDrag={(id, x, y) => {
+              setEditingItems(prev => ({
+                ...prev,
+                wallItems: {
+                  ...prev.wallItems,
+                  [id]: {
+                    ...prev.wallItems[id],
+                    x,
+                    y,
+                  }
                 }
-              }
-            }));
-          }}
-        >
-          <Image source={item.image} style={{ width: 80, height: 80 }} />
-        </DragItem>
-      ))
-    }
+              }));
+            }}
+          >
+            <Image source={item.image} style={{ width: 80, height: 80 }} />
+          </DragItem>
+        ))
+      }
 
-    {/* INVENTORY OVERLAY */}
-    {isEditing && openInventory && (
-      <Inventory 
-        setOpenInventory={setOpenInventory} 
-        onPlaceItem={handlePlaceItem} 
-      />
-    )}
+      {/* INVENTORY OVERLAY */}
+      {isEditing && openInventory && (
+        <Inventory 
+          setOpenInventory={setOpenInventory} 
+          onPlaceItem={handlePlaceItem} 
+        />
+      )}
 
-    {isEditing && selectedItem && (
-      <TransformBar 
-        rotateItem={rotateItem}
-        bringForward={bringForward} 
-        pushBack={pushBack} 
-        storeItem={storeItem}
-        selectedItem={selectedItem} 
-      />
-    )}
+      {isEditing && selectedItem && (
+        <TransformBar 
+          rotateItem={rotateItem}
+          bringForward={bringForward} 
+          pushBack={pushBack} 
+          storeItem={storeItem}
+          selectedItem={selectedItem} 
+        />
+      )}
 
-    { isEditing ? (
-      <RedecorateBar 
-        setOpenInventory={setOpenInventory} 
-        bringForward={bringForward} 
-        pushBack={pushBack} 
-        setStoreItem={storeItem}
-        saveEditing={saveEditing} 
-        cancelEditing={cancelEditing}/>
-    ) : (
-      <LowerNav startEditing={startEditing} />
-    )}
-    </View>
+      { isEditing ? (
+        <RedecorateBar 
+          setOpenInventory={setOpenInventory} 
+          bringForward={bringForward} 
+          pushBack={pushBack} 
+          setStoreItem={storeItem}
+          saveEditing={saveEditing} 
+          cancelEditing={cancelEditing}/>
+      ) : (
+        <LowerNav startEditing={startEditing} />
+      )}
+      </View>
+  </ViewShot>
   );
 };
 
