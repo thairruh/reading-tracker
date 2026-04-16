@@ -8,39 +8,76 @@ import gearIcon from '../assets/images/settings.png';
 import sticker2 from '../assets/stickers/first-entry.png';
 import sticker1 from '../assets/stickers/first-friend.png';
 import Goal from '../components/profile-goal';
+import { getCurrentUserProfile, updateCurrentUserProfile } from '@/src/firebase/profile';
 
 const Profile = () => {
 
-  const navigation = useNavigation();
+    const navigation = useNavigation();
 
-  const [user, setUser] = useState({ 
-        id: 182739, 
-        username: "ILikeDucks", 
-        image: pfp1, 
-        status: 'none',
-        rank: 12, 
-        bio: "I really like ducks, and I make this my entire personality trait for some reason.", 
-        favoriteBook: "Pride & Prejudice", 
-        currentlyReading: "The Song of Achilles",
-        stickers: [
-            { id: 1, image: sticker1 },
-            { id: 2, image: sticker2 },
-        ],
-        goals: [
-            { id: 1, name: 'Read 1 chapter'},
-            { id: 2, name: 'Read for 3 consecutive days'},
-            { id: 3, name: 'Read 5 chapters in one day'}
-        ],
+    type ProfileUser = {
+        username: string;
+        bio: string;
+        favoriteBook: string;
+        currentlyReading: string;
+        image: any;
+        stickers: { id: number; image: any }[];
+        goals: { id: number; name: string }[];
+    };
+
+    const [user, setUser] = useState<ProfileUser>({
+    username: "",
+    bio: "",
+    favoriteBook: "",
+    currentlyReading: "",
+    image: pfp1,
+    stickers: [
+        { id: 1, image: sticker1 },
+        { id: 2, image: sticker2 },
+    ],
+    goals: [
+        { id: 1, name: "Read 1 chapter" },
+        { id: 2, name: "Read for 3 consecutive days" },
+        { id: 3, name: "Read 5 chapters in one day" },
+    ],
 });
 
     const [isEditing, setIsEditing] = useState(false);
-    const [editedUser, setEditedUser] = useState(user);
+    const [editedUser, setEditedUser] = useState<ProfileUser>(user);
 
     useEffect(() => {
+        loadProfile();
+        }, []);
+
+        useEffect(() => {
         if (isEditing) {
             setEditedUser(user);
+        }
+        }, [isEditing, user]);
+
+        async function loadProfile() {
+        try {
+            const profile = await getCurrentUserProfile();
+
+            setUser({
+            username: profile.username,
+            bio: profile.bio,
+            favoriteBook: profile.favoriteBook,
+            currentlyReading: profile.currentlyReading,
+            image: pfp1,
+            stickers: [
+                { id: 1, image: sticker1 },
+                { id: 2, image: sticker2 },
+            ],
+            goals: [
+                { id: 1, name: "Read 1 chapter" },
+                { id: 2, name: "Read for 3 consecutive days" },
+                { id: 3, name: "Read 5 chapters in one day" },
+            ],
+            });
+        } catch (error) {
+            console.error("Failed to load profile:", error);
+        }
     }
-    }, [isEditing]);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -92,9 +129,20 @@ const Profile = () => {
                 
                 {/* SAVE CHANGES*/}
                 <Pressable
-                onPress={() => {
-                    setUser(editedUser); 
+                onPress={async () => {
+                    try {
+                    await updateCurrentUserProfile({
+                        username: editedUser.username,
+                        bio: editedUser.bio,
+                        favoriteBook: editedUser.favoriteBook,
+                        currentlyReading: editedUser.currentlyReading,
+                    });
+
+                    setUser(editedUser);
                     setIsEditing(false);
+                    } catch (error) {
+                    console.error("Failed to save profile:", error);
+                    }
                 }}
                 style={{ marginRight: 20 }}
                 >
@@ -143,9 +191,19 @@ const Profile = () => {
             )}
             </View>
 
-            <View style={{ width: '43%', height: 100, backgroundColor:'#EEDBD3', }}>
-                <Text style={ styles.text }>Currently Reading</Text>
-                <Text style={ styles.text }>{user.currentlyReading}</Text>
+            <View style={{ width: '43%', height: 100, backgroundColor:'#EEDBD3' }}>
+            <Text style={styles.text}>Currently Reading</Text>
+            {isEditing ? (
+                <TextInput
+                value={editedUser.currentlyReading}
+                style={{ margin: 10 }}
+                onChangeText={(text) =>
+                    setEditedUser({ ...editedUser, currentlyReading: text })
+                }
+                />
+            ) : (
+                <Text style={styles.text}>{user.currentlyReading}</Text>
+            )}
             </View>
         </View>
         

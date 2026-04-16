@@ -85,16 +85,25 @@ async function awardJournalEntryRewards(
         const rewardedJournalDates = userData.rewardedJournalDates ?? {};
         const unlockedStickers = userData.unlockedStickers ?? {};
 
+        const currentStreak =
+        typeof userData.currentStreak === "number" ? userData.currentStreak : 0;
+        const longestStreak =
+        typeof userData.longestStreak === "number" ? userData.longestStreak : 0;
+        const lastStreakDate =
+        typeof userData.lastStreakDate === "string" ? userData.lastStreakDate : "";
+
         let gemsToAward = 0;
         let rewardReason = "Check back tomorrow or log a new day to earn more gems!";
 
         if (!rewardedJournalDates[selectedDateKey]) {
         if (selectedDateKey === todayKey) {
             gemsToAward = 25;
-            rewardReason = "You filled your first entry for today! Come back daily to earn more gems.";
+            rewardReason =
+            "You filled your first entry for today! Come back daily to earn more gems.";
         } else if (selectedDateKey < todayKey) {
             gemsToAward = 10;
-            rewardReason = "You filled an entry for a past day! Earned fewer gems than a same-day entry, but it's great that you logged it.";
+            rewardReason =
+            "You filled an entry for a past day! Earned fewer gems than a same-day entry, but it's great that you logged it.";
         } else {
             gemsToAward = 0;
             rewardReason = "Future-dated entries do not earn gems.";
@@ -117,11 +126,36 @@ async function awardJournalEntryRewards(
         unlockedStickerIds.push("first_entry");
         }
 
+        let newCurrentStreak = currentStreak;
+        let newLongestStreak = longestStreak;
+        let newLastStreakDate = lastStreakDate;
+
+        // Only same-day entries count toward streaks.
+        // Past entries should not affect streak.
+        // Multiple entries on the same real day should not increment again.
+        if (selectedDateKey === todayKey && lastStreakDate !== todayKey) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayKey = getDateKey(yesterday);
+
+        if (lastStreakDate === yesterdayKey) {
+            newCurrentStreak = currentStreak + 1;
+        } else {
+            newCurrentStreak = 1;
+        }
+
+        newLongestStreak = Math.max(longestStreak, newCurrentStreak);
+        newLastStreakDate = todayKey;
+        }
+
         transaction.update(userRef, {
         gems: increment(gemsToAward),
         totalPagesRead: increment(pagesRead),
         rewardedJournalDates: updatedRewardedDates,
         unlockedStickers: updatedUnlockedStickers,
+        currentStreak: newCurrentStreak,
+        longestStreak: newLongestStreak,
+        lastStreakDate: newLastStreakDate,
         });
 
         return {
