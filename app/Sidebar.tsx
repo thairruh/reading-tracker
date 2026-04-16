@@ -64,7 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
         <View className="p-4 gap-4 absolute">
             
             {/* Profile */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/profile')} >
                 <Image 
                     source={require('../figma-icons/profile.png')}
                     className="w-12 h-12"
@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
             </TouchableOpacity>  
 
             {/* Leaderboard */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/leaderboard')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('./leaderboard')} >
                 <Image 
                     source={require('../figma-icons/leaderboard.png')}
                     className="w-12 h-12"

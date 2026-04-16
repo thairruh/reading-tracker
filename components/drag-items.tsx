@@ -20,9 +20,10 @@ export const DragItem = ({
 }: DragItemProps) => {
   // Initialize once with the item's real position
   const pan = useRef(new Animated.ValueXY()).current;
-console.log(item);
+
   const stopDragRef = useRef(stopDrag);
 
+  // Keep stopDrag ref fresh to avoid stale closures in panResponder
   useEffect(() => {
     stopDragRef.current = stopDrag;
   }, [stopDrag]);
@@ -50,10 +51,8 @@ console.log(item);
       },
 
       onPanResponderMove: Animated.event(
-        [null, { dx: item.scaleX === -1 ? 
-                Animated.multiply(pan.x, -1) : 
-                pan.x, dy: pan.y }],
-  { useNativeDriver: false }
+        [null, { dx: pan.x, dy: pan.y }],
+        { useNativeDriver: false }
       ),
 
       onPanResponderRelease: () => {
@@ -74,7 +73,7 @@ console.log(item);
       style={[
       {
         position: 'absolute',
-        transform: [{ translateX: pan.x }, { translateY: pan.y }, { scaleX: item.scaleX ?? 1 }],
+        transform: [{ translateX: pan.x }, { translateY: pan.y }],
         zIndex: item.z ?? 0,
       },
       selected && {
