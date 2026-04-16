@@ -83,6 +83,7 @@ const Shop = () => {
                         
                         <ShopItemInfo
                             selectedItem={selectedItem}
+                            selectedImage={imageMap[selectedItem.image]}
                             onClose={() => setSelectedItem(null)}
                             onToggleFavorite={() => toggleFavorite(selectedItem.id)}
                         />
@@ -98,7 +99,7 @@ const Shop = () => {
                                 onToggleFavorite={() => toggleFavorite(item.id)}
                                 onPress={() => setSelectedItem(item)}/>
                         ))}
-
+ 
                     </View>
                     )}
             </ScrollView>
