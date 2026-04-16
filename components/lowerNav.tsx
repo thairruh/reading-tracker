@@ -38,8 +38,11 @@ const LowerNav = ({ startEditing }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    zIndex: 100,
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    zIndex: 10,
+    backgroundColor: '#FF0000',
   },
   outerCircle: {
     width: 159,
