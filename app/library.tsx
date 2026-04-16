@@ -1,42 +1,107 @@
+import AddBook from '@/components/add-book';
 import CustomHeader from '@/components/banner';
-import React, { useState } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
-import plusIcon from '../assets/images/plusIcon.svg';
+import ViewBook from '@/components/library-book-info';
+import React, { useMemo, useState } from 'react';
+import { Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import plusIcon from '../assets/images/plusIcon.png';
 
 const Library = () => {
-    const colors = ['#E5BABA', '#B7B7C6', '#BBC6B7'];
-    const heights = [ 95, 105, 115, 130 ];
 
-    const [bookColor, setBookColor] = useState(colors[0]);
-    const [bookheight, setBookheight] = useState(heights[0]);
+  const [show, setShow] = useState(false);
+  const [book, setBook] = useState([]);
 
-    const changeBookStyle = () => {
-        const randomColor = Math.floor(Math.random() * colors.length);
-        const randomHeight = Math.floor(Math.random() * heights.length);
-        
-        setBookColor(colors[randomColor]);
-        setBookheight(heights[randomHeight]);
-    }
+  // Getting the width of the shelves because it depends
+  // on the specific device's screen width
+  const screenWidth = Dimensions.get('window').width;
+  const shelfWidth = screenWidth * 0.92;
+  const booksPerShelf = Math.floor(shelfWidth / 27);
+
+  //  +1 to count the plus as an item,
+  // so it can move to the next shelf when
+  // the current shelf runs out of space
+  const totalItems = book.length + 1;
+
+  // Must display at least 4 shelves
+  const requiredShelves = Math.ceil(totalItems / booksPerShelf);
+  const shelfCount = Math.max(4, requiredShelves);
+
+  // splits the books into chucks for each shelf
+  const shelves = useMemo(() => {
+  const result = [];
+  for (let i = 0; i < shelfCount; i++) {
+    const start = i * booksPerShelf;
+    const end = start + booksPerShelf;
+    result.push(book.slice(start, end));
+  }
+  return result;
+  }, [book, shelfCount, booksPerShelf]);
+
+  // determine in the plus goes on the same shelf or next
+  const plusIndex = book.length;
+  const plusShelfIndex = Math.floor(plusIndex / booksPerShelf);
+
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [viewBook, setViewBook] = useState(false);
 
   return (
-    <View style={styles.container}>
-        <CustomHeader title="Library" showGems={false}/>
+    <ScrollView style={styles.container}>
+      <CustomHeader title="Library" showGems={false} />
 
-        <View style={[styles.shelf, {marginTop: 20}]}>
-            <View style={{flexDirection: 'row', position: 'absolute', bottom: 0}}>
+      {shelves.map((shelfBooks, shelfIndex) => (
+        <View key={shelfIndex} style={styles.shelf}>
+          <View className="flex-row items-end absolute bottom-0">
+            
+            {shelfBooks.map(item => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => {
+                  setSelectedBook(item);
+                  setViewBook(true);
+                }}
+                style={[
+                  styles.book,
+                  {
+                    backgroundColor: item.color,
+                    height: item.height,
+                  },
+                ]}
+              />
+            ))}
 
-                <View style={[styles.book, {backgroundColor: bookColor, height: bookheight}]}/>
-                <View style={[styles.book, {backgroundColor: bookColor, height: bookheight}]}/>
+            {/* Move the + to the next shelf when the current
+                shelf runs out of space*/}
+            {shelfIndex === plusShelfIndex && (
+              <View style={styles.transparentBox}>
+                <Pressable onPress={() => setShow(true)}>
+                  <Image source={plusIcon} className="mt-1.5"/>
+                </Pressable>
+              </View>
+            )}
 
-                <View style={styles.transparentBox}>
-                    <Image source={plusIcon} className="mt-1"/>
-                </View>
-            </View>
+          </View>
         </View>
-        <View style={styles.shelf}></View>
-        <View style={styles.shelf}></View>
-        <View style={styles.shelf}></View>
-    </View>
+      ))}
+
+      <Modal visible={show} transparent>
+        <AddBook setBook={setBook} onClose={() => setShow(false)} />
+      </Modal>
+
+      <Modal visible={viewBook} transparent>
+        {selectedBook && (
+          <ViewBook
+            title={selectedBook.title}
+            startDate={selectedBook.startDate?.toLocaleDateString()}
+            finishDate={selectedBook.finishDate?.toLocaleDateString()}
+            status={selectedBook.status}
+            rating ={selectedBook.rating}
+            onClose={() => {
+              setViewBook(false)
+              setSelectedBook(null);}}
+          />
+        )}
+      </Modal>
+
+    </ScrollView>
   );
 };
 
@@ -61,12 +126,14 @@ const styles = StyleSheet.create({
   },
 
   transparentBox: {
-    width: 35,
-    height: 35,
-    borderRadius: 4,
-    backgroundColor: "#C8AFAF",
-    opacity: 55,
-    alignItems: 'center',
+    width: 35, 
+    height: 35, 
+    borderRadius: 4, 
+    backgroundColor: "#C8AFAF", 
+    opacity: 0.85, 
+    alignItems: 'center', 
+    marginLeft: 10, 
+    marginBottom: 50,
   },
 
 
