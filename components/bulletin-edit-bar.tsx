@@ -136,26 +136,50 @@ export const NoteEditBar = ({ donePressed, text, color }: EditBarProps) => {
     );
 }
 
-export const RedecorateEditBar = ({  donePressed }: EditBarProps) => {
+export const RedecorateEditBar = ({ cancelEditing, bringForward, pushBack, setStoreItem, setOpenInventory, saveEditing }) => {
     const router = useRouter();
 
     return (
-        <View className="flex-row absolute bottom-56 w-full">
+        <View className="flex-row absolute bottom-20 w-full">
             <Pressable 
-                
-                style={styles.buttonstyle} 
+                onPress={cancelEditing}
+                style={styles.redecorate} 
                 className="border-r-hairline"
             >
                 <Image
                     style={styles.image}
                     source={require('../figma-icons/crop_rotate.png')}
                 />
-                <Text style={styles.text}>Rotate</Text>
+                <Text style={styles.text}>Cancel</Text>
             </Pressable>
 
             <Pressable 
-                
-                style={styles.buttonstyle} 
+                onPress={pushBack}
+                style={styles.redecorate} 
+                className="border-l-0 border-r-hairline"
+            >
+                <Image
+                    style={styles.image}
+                    source={require('../figma-icons/crop_rotate.png')}
+                />
+                <Text style={[styles.text]}>Back</Text>
+            </Pressable>
+
+            <Pressable 
+                onPress={bringForward}
+                style={styles.redecorate} 
+                className="border-l-0 border-r-hairline"
+            >
+                <Image
+                    style={styles.image}
+                    source={require('../figma-icons/crop_rotate.png')}
+                />
+                <Text style={[styles.text ]}>Forward</Text>
+            </Pressable>
+
+            <Pressable 
+                onPress={() => setStoreItem(true)}
+                style={styles.redecorate} 
                 className="border-l-0 border-r-hairline"
                 >
                 <Image
@@ -166,18 +190,19 @@ export const RedecorateEditBar = ({  donePressed }: EditBarProps) => {
             </Pressable>
 
             <Pressable 
-                style={styles.buttonstyle} 
+                onPress={() => setOpenInventory(true)}
+                style={styles.redecorate} 
                 className="border-l-0 border-r-hairline">
                 <Image
                     style={styles.image}
                     source={require('../figma-icons/place_item.png')}
                 />                
-                <Text style={styles.text}>Place Item</Text>
+                <Text style={[styles.text, { fontSize: 12} ]}>Inventory</Text>
             </Pressable>
 
             <Pressable  
-                onPress={donePressed} 
-                style={styles.buttonstyle}
+                onPress={saveEditing} 
+                style={styles.redecorate}
                 className="border-l-0"
             >
                 <Image
@@ -186,7 +211,6 @@ export const RedecorateEditBar = ({  donePressed }: EditBarProps) => {
                 />    
                 <Text style={styles.text}>Done</Text>
             </Pressable>
-
         </View>
     );
 }
@@ -195,6 +219,13 @@ const styles = StyleSheet.create({
     buttonstyle: {
         width: 65,
         height: 65,
+        backgroundColor: '#EEDBD3',
+        borderWidth: 2,
+        borderColor: '#472A2A',
+    },
+    redecorate: {
+        width: 60,
+        height: 60,
         backgroundColor: '#EEDBD3',
         borderWidth: 2,
         borderColor: '#472A2A',

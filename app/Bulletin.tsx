@@ -64,19 +64,7 @@ export default function Bulletin() {
             { id: 2, image: sticker2 },
         ],
 });
-//         <View style={{ width: '90%', height: 100, backgroundColor:'#EEDBD3', marginBottom: 20, flexDirection:'row'}}>
-//             {user.stickers.map((sticker) => (
-//                 <Image
-//                     key={sticker.id}
-//                     source={sticker.image}
-//                     style={{
-//                     width: 60,
-//                     height: 60,
-//                     marginLeft: 20,
-//                     marginTop: 20
-//                     }}/>
-//             ))}
-//         </View>
+
     const showStickers = () => {
         setStickerVisible(true);
     }    
@@ -209,14 +197,9 @@ export default function Bulletin() {
                         </View>
                         </View>
                     )}
-                </View>
-                    
+                </View> 
             )}
-          
-
-            
-        </View>
-    
+        </View>    
     </TouchableWithoutFeedback>
   );
 };
