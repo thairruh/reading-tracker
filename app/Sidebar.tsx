@@ -1,24 +1,43 @@
 import { useNavigation, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Text, TouchableOpacity, View, ImageSourcePropType } from 'react-native';
 import { Drawer } from 'react-native-drawer-layout';
+import { auth, db } from '@/src/firebase/config';
+import { doc, onSnapshot } from 'firebase/firestore';
  
 type SidebarProps = {
     children: React.ReactNode;
-    username?: string;
-    photoURL?: string;
-    currentStreak?: number;
-    gems?: number;
-}
+};
 
 
-export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems, username, photoURL }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ children }) => {
     const router = useRouter();
-    const navigation = useNavigation();
-    const [open, setOpen] = React.useState(false); 
+    const [open, setOpen] = useState(false);
 
-    const openSidebar = () => setOpen(true);
-    const closeSidebar = () => setOpen(false);
+    const [username, setUsername] = useState("");
+    const [photoURL, setPhotoURL] = useState("");
+    const [currentStreak, setCurrentStreak] = useState(0);
+    const [gems, setGems] = useState(0);
+
+    useEffect(() => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const ref = doc(db, "users", user.uid);
+
+        const unsubscribe = onSnapshot(ref, (snap) => {
+        const data = snap.data();
+        if (!data) return;
+
+        setUsername(data.username ?? "");
+        setPhotoURL(data.photoUrl ?? "");
+        setCurrentStreak(data.currentStreak ?? 0);
+        setGems(data.gems ?? 0);
+        });
+
+        return unsubscribe;
+    }, []);
+
     const defaultpfp = require('../figma-icons/blank-pfp.png');
     const pfpSource = photoURL ? { uri: photoURL } : defaultpfp;
 
@@ -43,6 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
 
         {/* currentStreak display */}
         <View>
+            <Image source={require('../assets/images/Star.png')} className="absolute top-[31px] left-24 w-7 h-7" resizeMode="contain"/>
             <Text className="absolute top-[315px] left-32 text-center text-xl text-brown">{currentStreak ? currentStreak : 0}</Text>
             <Text className="absolute top-[345px] left-24 text-xl text-brown">streak</Text>
         </View>
@@ -64,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, currentStreak, gems,
         <View className="p-4 gap-4 absolute">
             
             {/* Profile */}
-            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('/')} >
+            <TouchableOpacity className="top-[390px] flex-row items-center" onPress={() => router.replace('./profile')} >
                 <Image 
                     source={require('../figma-icons/profile.png')}
                     className="w-12 h-12"

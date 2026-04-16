@@ -9,6 +9,7 @@ interface EditBarProps {
     donePressed?: () => void;
     editPressed?: () => void;
     deletePressed?: () => void;
+    onSave?: () => void;
     text?: string;
     color?: string;
 }
@@ -31,7 +32,7 @@ export const EditBar = ({ addNotePressed, donePressed, editPressed, deletePresse
             </Pressable>
 
             <Pressable 
-                onPress={() => router.navigate('/bulletin-add-note')}
+                onPress={addNotePressed}
                 style={styles.buttonstyle} 
                 className="border-l-0 border-r-hairline"
                 >
@@ -80,32 +81,7 @@ export const EditBar = ({ addNotePressed, donePressed, editPressed, deletePresse
     );
 }
 
-export const NoteEditBar = ({ donePressed, text, color }: EditBarProps) => {
-    const navigation = useNavigation();
-    const { id } = useLocalSearchParams();
-    const { notes, editNote, addNote } = useNotes();
-    const existingNote = notes.find(n => n.id.toString() === id);
-
-    const [noteText, setNoteText] = useState(existingNote?.text || "");
-    const [noteColor, setNoteColor] = useState(existingNote?.color || '#EFCB8C');
-
-    const handleDone = () => { 
-        //If note has id & exists, edit the note's attributes when 'done' is pressed
-        if(id) {
-            editNote(Number(id), {text, color});
-        } else { //Otherwise create a new note
-        const newNote = {
-            id: Date.now(),
-            text: text,
-            color: color,
-            // top: Math.floor(Math.random() * (288 - 24 - 20)) + 10,
-            // left: Math.floor(Math.random() * (300 - 24 - 20)) + 10,
-        };
-            addNote(newNote);
-        }
-        navigation.goBack();
-    };    
-
+export const NoteEditBar = ({ onSave }: EditBarProps) => {
     return (
         <View className="flex-row absolute bottom-56 w-full">
             <Pressable style={styles.buttonstyle} className="border-r-hairline">
@@ -116,20 +92,20 @@ export const NoteEditBar = ({ donePressed, text, color }: EditBarProps) => {
                 <Text style={styles.text}>Delete</Text>
             </Pressable>
 
-            <Pressable  
-                onPress={handleDone} 
+            <Pressable
+                onPress={onSave}
                 style={styles.buttonstyle}
                 className="border-l-0"
             >
                 <Image
                     style={styles.image}
                     source={require('../figma-icons/check.png')}
-                />    
+                />
                 <Text style={styles.text}>Done</Text>
             </Pressable>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     buttonstyle: {
