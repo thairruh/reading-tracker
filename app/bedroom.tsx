@@ -22,6 +22,7 @@ const Bedroom = ({ onSnapshotUpdate}) => {
   const [openInventory, setOpenInventory] = useState(false);
   
 
+  // This is for items that can only have one of its type on the screen
   const [roomItems, setRoomItems] = useState({
     bed: { image: plainBed, x: 0, y: 500, z:2, scaleX: 1},
     bookshelf: {image: bookshelf, x: 150, y: 350, z:1, scaleX: 1},
@@ -141,11 +142,12 @@ const storeItem = () => {
 
 //--- MAIN REDECORATE TOOLBAR ACTIONS ---//
 
-// if an item of that style (e.g. bed) is already placeed,
-// swap the image to change style
 const handlePlaceItem = (newItem) => {
     const type = newItem.tag.toLowerCase();
     
+    // items with the "wall-item" tag can have multiple items
+    // of that type added to the screen. wall-items can be replaced
+    // with desk-items for the desk screen
     if (type === "wall-item") {
       const id = `wall-${Date.now()}`;
 
@@ -171,6 +173,8 @@ const handlePlaceItem = (newItem) => {
       };
     });
 
+// if an item of that style (e.g. bed) is already placeed,
+// swap the image to change style
   } else {
     setEditingItems(prev => ({
         ...prev,
@@ -214,6 +218,8 @@ const handlePlaceItem = (newItem) => {
 
 
   return (
+    // Wrap the Screen in ViewShot so that the Where to Next screen can
+    //capture images of the players actual bedroom whenever they redecorate it
     <ViewShot 
       ref={viewShotRef} 
       style={{ flex: 1 }} 
@@ -354,7 +360,7 @@ const handlePlaceItem = (newItem) => {
       <Image source={displayItems.table.image} style={{width:300, height:200}} contentFit="contain" />
     </DragItem>
   )}
-
+      {/* This maps the items that can have multiple of that type placed */}
       {displayItems.wallItems &&
         Object.values(displayItems.wallItems).map(item => (
           <DragItem
