@@ -7,7 +7,7 @@ import FavoriteButton from './favorite-btn';
 
 const ShopItemInfo = ({ selectedItem, onClose, onToggleFavorite, selectedImage }) => {
     if (!selectedItem) return null;
-
+console.log("Variants Data:", selectedItem.variants);
     const hasVariants = selectedItem.variants && selectedItem.variants.length > 0;
     const [currentImage, setCurrentImage] = useState(selectedImage);
 
@@ -42,7 +42,7 @@ const ShopItemInfo = ({ selectedItem, onClose, onToggleFavorite, selectedImage }
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center'}}>
-                    <Image source={gemIcon} style={{ width: 18, height: 16, marginTop: 9 }}/>
+                    <Image source={gemIcon} style={{ width: 18, height: 16 }}/>
                     <Text className="pl-2 font-semibold text-2xl">{selectedItem.price}</Text>
                 </View>
 
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     marginTop: 20
   },
   activeVariant: {
-    borderColor: '#FFB6B6',
+    borderColor: '#ffb8ca',
     borderWidth: 2,
   },
   variantImage: {
