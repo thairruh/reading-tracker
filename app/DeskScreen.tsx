@@ -1,27 +1,27 @@
-import { Stack, useRouter } from 'expo-router';
-import React, { use, useEffect, useState } from 'react';
-import { Image, TouchableOpacity, View, Text, Pressable, StyleSheet } from "react-native";
-import { ImgButton, NavButton } from '../components/buttons/navButtons';
-import { Sidebar } from './Sidebar';
-import JournalModal from '../components/JournalModal';
-import { Asset } from 'expo-asset';
-import { auth, db } from '@/src/firebase/config';
-import { getUserDocument } from '@/src/firebase/users';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { RedecorateEditBar } from '@/components/bulletin-edit-bar';
-import { StickyNote } from '@/components/sticky-note';
-import { useNotes } from '@/components/NoteContext';
 import { DragNote } from '@/components/DragNote';
+import Inventory from '@/components/inventory';
+import LowerNav from '@/components/lowerNav';
+import { useNotes } from '@/components/NoteContext';
+import RedecorateBar from '@/components/redecorate-bar';
 import { useStickers } from '@/components/StickerContext';
-import { DragItem } from '../components/drag-items';
-import DeskInventory from '@/components/desk-inventory';
+import { StickyNote } from '@/components/sticky-note';
+import { auth, db } from '@/src/firebase/config';
+import { Asset } from 'expo-asset';
+import { Stack, useRouter } from 'expo-router';
+import { doc, onSnapshot } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import flowerlamp from '../assets/images/desk/Desk-flower-lamp.png';
 import monstera from '../assets/images/desk/Desk-monstera.png';
 import aglaonema from '../assets/images/desk/desk-plant-aglaonema.png';
 import peacelily from '../assets/images/desk/desk-plant-peacelily .png';
 import wallphotos from '../assets/images/desk/Desk-wall-photos.png';
-import wallpaper1 from '../assets/images/desk/Desk-wallpaper-1.png';
-import flowerlamp from '../assets/images/desk/Desk-flower-lamp.png';
+import wallpaper1 from '../assets/images/desk/desk-wallpaper-1.png';
 import info from '../assets/images/info.png';
+import { NavButton } from '../components/buttons/navButtons';
+import { DragItem } from '../components/drag-items';
+import JournalModal from '../components/JournalModal';
+import { Sidebar } from './Sidebar';
 
 export default function DeskScreen() {
     const router = useRouter();
@@ -342,8 +342,9 @@ const handlePlaceItem = (newItem) => {
             />
         </View>
 
+        
         { /* 'Shop' Button */ }
-        <View className="absolute -bottom-20 -right-24 w-full">
+        {/*<View className="absolute -bottom-20 -right-24 w-full">
             <ImgButton
             screenName="/shop" //file name that links to shop
             imgSource={require('../figma-icons/shop_btn.png')}
@@ -352,10 +353,10 @@ const handlePlaceItem = (newItem) => {
             imgStyle="w-64 h-64"
             resizeMode="contain"
             />
-        </View>
+        </View>*/}
     
         { /* 'Redecorate' Button */ }
-        <View className="absolute bottom-44 right-[150px]">
+        { /*<View className="absolute bottom-44 right-[150px]">
             <Pressable
                 onPress={() => {
                     setIsEditing(true);
@@ -366,7 +367,8 @@ const handlePlaceItem = (newItem) => {
                 <View className={"rounded-full absolute bg-peach w-44 h-44"}/>
                 <Text className={"font-bold text-brown "}>Redecorate</Text>
             </View>
-            </Pressable>
+            </Pressable>*/}
+
 
             {/* <NavButton 
             text="Redecorate" 
@@ -374,8 +376,8 @@ const handlePlaceItem = (newItem) => {
             btnStyle="absolute bg-light-pink w-48 h-48 rounded-full z-50"
             textStyle=""
             innerCircle="absolute bg-peach w-44 h-44"
-            /> */}
-        </View>
+            /> 
+        </View>*/}
         </>
         )}
       {/* REDECORATE INSTRUCTIONS BOX */}
@@ -390,25 +392,25 @@ const handlePlaceItem = (newItem) => {
       )}        
         {/* INVENTORY OVERLAY */}
         {isEditing && openInventory && (
-            <DeskInventory
+            <Inventory
                 setIsEditing={setIsEditing}
                 setOpenInventory={setOpenInventory} 
                 onPlaceItem={handlePlaceItem} 
+                currentRoom="Desk"
             />
         )}
-        { isEditing && (
-            <View className="flex-row absolute bottom-0 ml-5 w-full h-full">
-                <RedecorateEditBar 
-                    cancelEditing={cancelEditing}
-                    pushBack={pushBack}
-                    bringForward={bringForward}
-                    setStoreItem={storeItem}
-                    setOpenInventory={setOpenInventory}
-                    saveEditing={saveEditing}
-                    />
-            </View>
-        )}
-    </View>
+        { isEditing ? (
+            <RedecorateBar 
+                setOpenInventory={setOpenInventory} 
+                bringForward={bringForward} 
+                pushBack={pushBack} 
+                setStoreItem={storeItem}
+                saveEditing={saveEditing} 
+                cancelEditing={cancelEditing}/>
+            ) : (
+                <LowerNav startEditing={startEditing} />
+            )}
+        </View>
     <JournalModal
     visible={journalVisible}
     onClose={() => setJournalVisible(false)}
