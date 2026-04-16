@@ -8,11 +8,13 @@ import { Asset } from 'expo-asset';
 import { auth, db } from '@/src/firebase/config';
 import { getUserDocument } from '@/src/firebase/users';
 import { doc, onSnapshot } from 'firebase/firestore';
+import { refreshCurrentUserStreak } from '@/src/firebase/users';
 
 export default function DeskScreen() {
     const router = useRouter();
     const [journalVisible, setJournalVisible] = useState(false);
     const [gems, setGems] = useState(0);
+    const [currentStreak, setCurrentStreak] = useState(0);
 
     // load journal image into cache for smoother performance when opening journal modal
     useEffect(() => {
@@ -22,6 +24,12 @@ export default function DeskScreen() {
     Asset.loadAsync(require("../assets/journal-tabs/stickers-tab.png"));
     }, []);
 
+    // fetch user data to get streak for display on deskscreen
+    useEffect(() => {
+        refreshCurrentUserStreak().catch((error) => {
+            console.error("Failed to refresh streak:", error);
+        });
+    }, []);
 
     // fetch user data to get gems for display on deskscreen
     useEffect(() => {
@@ -33,13 +41,14 @@ export default function DeskScreen() {
         const unsubscribe = onSnapshot(ref, (snap) => {
             const data = snap.data();
             setGems(data?.gems ?? 0);
+            setCurrentStreak(data?.currentStreak ?? 0);
         });
 
         return unsubscribe;
     }, []);
 
   return (
-    <Sidebar gems={gems}>
+    <Sidebar>
     
     <View className="flex-1 items-center justify-center bg-light-pink">
 
@@ -74,8 +83,11 @@ export default function DeskScreen() {
                 <Image
                 source={require('../figma-icons/star_Box.png')}
                 className="w-20"
-                resizeMode='contain'
+                resizeMode="contain"
                 />
+                <View className="absolute inset-y-0 right-3 items-center justify-center">
+                <Text className="text-[12px] text-black -mt-1.5">{currentStreak}</Text>
+                </View>
             </View>
 
         {/* Gem Box */}
