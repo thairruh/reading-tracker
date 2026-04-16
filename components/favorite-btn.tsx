@@ -6,7 +6,7 @@ import filledHeart from '../assets/images/Heart.png';
 const FavoriteButton = ({ favorited, onPress }) => {
 
   return (
-    <Pressable onPress={onPress}>
+    <Pressable onPress={onPress} className='z-10'>
       <Image 
         source={ favorited ? filledHeart : emptyHeart }
         style={styles.heart}/>
@@ -20,7 +20,6 @@ const styles = StyleSheet.create({
     width: 22,
     height: 18,
     marginLeft: 10,
-    zIndex: 1
   },
 
 });

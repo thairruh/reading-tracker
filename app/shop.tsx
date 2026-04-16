@@ -93,6 +93,7 @@ const Shop = () => {
                             <ShopItem 
                                 key={item.id}
                                 {...item} 
+                                tag={item.tag}
                                 image={imageMap[item.image]}
                                 onToggleFavorite={() => toggleFavorite(item.id)}
                                 onPress={() => setSelectedItem(item)}/>

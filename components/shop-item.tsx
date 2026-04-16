@@ -3,14 +3,22 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import gem from '../assets/images/gem.png';
 import FavoriteButton from './favorite-btn';
 
-const ShopItem = ({ name, price, image, favorited, onToggleFavorite, onPress }) => {
+const ShopItem = ({ name, price, image, favorited, onToggleFavorite, onPress, tag }) => {
+  
+  const isWallpaper = tag?.toLowerCase() === 'wallpaper';
+
   return (
     <Pressable style={styles.container} onPress={onPress}>
 
       <View className="items-center">
-          <View style={styles.box}>
+          <View style={[styles.box, isWallpaper && { padding: 0, overflow: 'hidden' }]}>
               <FavoriteButton favorited={favorited} onPress={onToggleFavorite}/>
-              <Image source={image} style={styles.wrapper} className="w-full h-full" resizeMode="contain"/>
+              <Image 
+                source={image} 
+                style={isWallpaper ? styles.fullImage : styles.wrapper}
+                className="w-full h-full" 
+                resizeMode={isWallpaper ? "cover" : "contain"}
+              />
           </View>
           
           <View className="mb-5 items-center">
@@ -44,6 +52,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#472A2A',
     borderRadius: 20,
+    overflow: 'hidden',
   },
   wrapper: {
   position: 'absolute',
@@ -55,6 +64,11 @@ const styles = StyleSheet.create({
   justifyContent: 'center',
   alignItems: 'center',
 },
+fullImage: {
+    width: '100%',
+    height: 140,
+    position: 'absolute',
+  }
 });
 
 export default ShopItem;
