@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import React, { use, useEffect, useState } from 'react';
-import { Image, TouchableOpacity, View, Text, Pressable } from "react-native";
+import { Image, TouchableOpacity, View, Text, Pressable, StyleSheet } from "react-native";
 import { ImgButton, NavButton } from '../components/buttons/navButtons';
 import { Sidebar } from './Sidebar';
 import JournalModal from '../components/JournalModal';
@@ -14,11 +14,13 @@ import { useNotes } from '@/components/NoteContext';
 import { DragNote } from '@/components/DragNote';
 import { useStickers } from '@/components/StickerContext';
 import { DragItem } from '../components/drag-items';
-// import Inventory from '@/components/inventory';
+import DeskInventory from '@/components/desk-inventory';
 import monstera from '../assets/images/desk/Desk-monstera.png';
 import aglaonema from '../assets/images/desk/desk-plant-aglaonema.png';
 import peacelily from '../assets/images/desk/desk-plant-peacelily .png';
 import wallphotos from '../assets/images/desk/Desk-wall-photos.png';
+import wallpaper1 from '../assets/images/desk/Desk-wallpaper-1.png';
+import flowerlamp from '../assets/images/desk/Desk-flower-lamp.png';
 import info from '../assets/images/info.png';
 
 export default function DeskScreen() {
@@ -28,19 +30,22 @@ export default function DeskScreen() {
     const [isVisible, setIsVisible] = React.useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingItems, setEditingItems] = useState(null);
-    const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedItem, setSelectedItem] = useState<string | null>(null);
     const [openInventory, setOpenInventory] = useState(false);
     const [storeItem, setStoreItem] = useState(null);
 
   const [deskItems, setdeskItems] = useState({
     plant: { image: monstera, x: 0, y: 500, z:2},
+    deskItem: null,
     wallItem: {image: wallphotos, x: 150, y: 350, z:1},
     wallpaper: null,
   });
 
   const [inventory, setInventory] = useState({
     plant: [aglaonema, peacelily],
+    deskItem: [flowerlamp],
     wallItem: [wallphotos],
+    wallpaper: [wallpaper1],
   });
 
  const startEditing = () => {
@@ -231,6 +236,39 @@ const handlePlaceItem = (newItem) => {
         {/* Underdesk */}
         <View className="absolute bottom-0 w-full h-20 bg-under-desk z-0" />
 
+        {/* PLANT */}
+        <View className="absolute bottom-20 left-10 right-10 w-full h-full">
+            <Image source={monstera} className='w-96 h-96 z-10' resizeMode='contain'/>
+        </View>
+        <DragItem
+        item={{ 
+            id: 'plant', 
+            x: displayItems.plant.x, 
+            y: displayItems.plant.y, 
+            z: displayItems.plant.z 
+        }}
+        draggable={isEditing}
+        selected={isEditing && selectedItem === 'plant'}
+        onPress={() => setSelectedItem('plant')}
+        stopDrag={(id, x, y) => {
+        if (isEditing) {
+            setEditingItems(prev => ({
+            ...prev,
+            [id]: {
+                ...prev[id],
+                x,
+                y
+            }
+            }));
+        }
+        }}
+        >
+            <Image 
+            source={displayItems.plant.image}
+            style={styles.plant} 
+            resizeMode="contain"
+        />
+        </DragItem>        
         {/* Header */}
         <Image
         source={require('../figma-icons/header-lg.png')}
@@ -347,7 +385,8 @@ const handlePlaceItem = (newItem) => {
       )}        
         {/* INVENTORY OVERLAY */}
         {isEditing && openInventory && (
-            <Inventory 
+            <DeskInventory
+                setIsEditing={setIsEditing}
                 setOpenInventory={setOpenInventory} 
                 onPlaceItem={handlePlaceItem} 
             />
@@ -372,3 +411,10 @@ const handlePlaceItem = (newItem) => {
     </Sidebar>
   );
 };
+
+const styles = StyleSheet.create({
+    plant: {
+        width: 100,
+        height: 100,
+    }
+});
