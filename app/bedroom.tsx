@@ -225,10 +225,10 @@ const handlePlaceItem = (newItem) => {
 
         {/* REDECORATE INSTRUCTIONS BOX */}
         {isEditing && (
-          <View className="w-[70%] h-[60px] bg-[#EED8D3] self-center mt-[100px]">
-            <View className="flex-row items-center mt-[15px]">
-              <Image source={info} className="w-[24px] h-[24px] ml-[15px]"/>
-              <Text className="ml-2">{"Drag an item to move it.\nChange its style from the inventory."}</Text>
+          <View className="w-[75%] h-[60px] bg-[#EED8D3] opacity-90 self-center mt-[100px] border-dashed border-2">
+            <View className="flex-row items-center mt-[10px] ml-3">
+              <Image source={info} style={{ width: 24, height: 24, marginRight: 5 }}/>
+              <Text className="">{"Drag an item to move it.\nUse the inventory to add or change items."}</Text>
             </View>
           </View>
         )}
@@ -303,7 +303,7 @@ const handlePlaceItem = (newItem) => {
       </View>
       </DragItem>
 
-      {/* RUG */}
+  {/* RUG */}
   {displayItems.rug.image && (
     <DragItem
       item={{ 
@@ -387,6 +387,7 @@ const handlePlaceItem = (newItem) => {
         <Inventory 
           setOpenInventory={setOpenInventory} 
           onPlaceItem={handlePlaceItem} 
+          currentRoom="Bedroom"
         />
       )}
 

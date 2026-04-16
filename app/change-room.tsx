@@ -30,7 +30,7 @@ const ChangeRoom = () => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <CustomHeader title="Where to Next?" />
+        <CustomHeader title="Where to Next?" showBackArrow={true}/>
 
         <Link href="/DeskScreen" asChild>
           <Pressable style={styles.box}>

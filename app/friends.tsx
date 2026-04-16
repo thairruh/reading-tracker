@@ -56,7 +56,7 @@ const FindFriends = () => {
   return (
     <View style={styles.container}>
       
-      <CustomHeader title="Friends" showGems={false} />
+      <CustomHeader title="Friends" showGems={false} showBackArrow={true}/>
 
       
       <View style={styles.wrapper}>

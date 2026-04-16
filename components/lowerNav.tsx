@@ -39,7 +39,7 @@ const LowerNav = ({ startEditing }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    
+    zIndex: 100,
   },
   outerCircle: {
     width: 159,

@@ -5,19 +5,25 @@ import flowerRug from '../assets/images/bedroom/Bedroom-circle-rug.png';
 import pinkBed from '../assets/images/bedroom/Bedroom-frilly-bed-pink.png';
 import whiteShelf from '../assets/images/bedroom/br-bookshelf-white.png';
 import plainTable from '../assets/images/bedroom/br-plain-table.png';
+import miniPC from '../assets/images/desk/Blue-desk-mini-comp.png';
+import flowerLamp from '../assets/images/desk/Desk-flower-lamp.png';
 import x from '../assets/images/x.png';
+import CustomHeader from './banner';
 
 
-const Inventory = ({ setIsEditing, setOpenInventory, onPlaceItem }) => {
-    const [activeTab, setActiveTab] = useState('Bedroom');
+const Inventory = ({ setOpenInventory, onPlaceItem, currentRoom }) => {
+    const [activeTab, setActiveTab] = useState(currentRoom);
 
-    const [items, setItems] = useState([
+    const items = [
         { id: 'bow-photo', name: "Photo", image: photo, category: "Bedroom", tag:'wall-item', favorited: false },
         { id: 'frilly-bed-pink', name: "Frilly bed", image: pinkBed, category: "Bedroom", tag:'bed', favorited: true },
         { id: 'white-shelf', name: "White Bookshelf", image: whiteShelf, category: "Bedroom", tag:'bookshelf', favorited: false },
         { id: 'flower-rug', name: "Flower Rug", image: flowerRug, category: "Bedroom", tag:'rug', favorited: true },
         { id: 'plain-table', name: "Plain Table", image: plainTable, category: "Bedroom", tag:'table', favorited: false },
-    ]);
+
+        { id: 'mini-pc', name: "Mini PC", image: miniPC, category: "Desk", tag:'knick-knack' },
+        { id: 'flower-lamp', name: "Flower Lamp", image: flowerLamp, category: "Desk", tag:'knick-knack' },
+    ];
 
     const filteredItems = items.filter(item => item.category === activeTab);
 
@@ -26,25 +32,27 @@ const Inventory = ({ setIsEditing, setOpenInventory, onPlaceItem }) => {
         <View className='absolute w-full h-full bg-black/30'/>
 
         <View className="w-full top-[20px] left-[20px] z-50">
-            <Pressable 
-              onPress={() => setOpenInventory(false)} 
-              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-            >
+            <Pressable onPress={() => setOpenInventory(false)} >
               <Image source={x} className="w-[36px] h-[36px]"/>
             </Pressable>
         </View>
        
 
         <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.bgBox}>
-                
-            <View className="flex-row flex-wrap justify-center mt-5">
+            <View className='items-center'>
+              <CustomHeader 
+                title={currentRoom === 'Bedroom' ? 'Bedroom Inventory' : 'Desk Inventory'} 
+                showGems={false}
+                showBackArrow={false}/>
+            </View>
+            
+
+            <View className="flex-row flex-wrap ml-3 mt-5">
                 {filteredItems.map(item => (
                     <View key={item.id} className="items-center">
                         <TouchableOpacity 
-                            onPress={() => {
-                              console.log("INVENTORY CLICKED:", item); 
-                              onPlaceItem(item);}}
-                            style={styles.itemCard}
+                            onPress={() => { onPlaceItem(item);}}
+                              style={styles.itemCard}
                         >
                             <Image source={item.image} className="w-[100px] h-[100px]" resizeMode="contain" />
                         </TouchableOpacity>
@@ -77,7 +85,7 @@ const styles = StyleSheet.create({
   bgBox: {
     width: '90%',
     height: '70%',
-    backgroundColor: '#f9f1ef',
+    backgroundColor: '#f9efef',
     flexGrow: 0,
 
     borderWidth: 1.5,
@@ -88,20 +96,31 @@ const styles = StyleSheet.create({
 
   itemCard: {
     width: 100,
-    height: 140,
-    backgroundColor: 'transparent',
+    height: 120,
+    backgroundColor: '#fff9fc',
 
     paddingTop: 15,
     margin: 10,
     marginBottom: 5,
     alignItems: 'center',
 
-    borderWidth: 1,
-    borderColor: '#472A2A',
-    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#472c23',
+    borderStyle: 'dashed',
+    borderRadius: 15,
+
+    shadowColor: '#5F382B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
 
-  itemText: { fontSize: 12, marginTop: 5, color: '#5F382B' }
+  itemText: { 
+    fontSize: 14, 
+    marginTop: 3,
+    marginBottom: 5, 
+    color: '#5F382B' }
 
 });
 

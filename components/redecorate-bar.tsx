@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    zIndex:1,
+    zIndex: 100,
   },
   divder: {
     height: '80%', 
