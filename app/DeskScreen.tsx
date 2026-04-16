@@ -9,7 +9,7 @@ import { auth, db } from '@/src/firebase/config';
 import { Asset } from 'expo-asset';
 import { Stack, useRouter } from 'expo-router';
 import { doc, onSnapshot } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import flowerlamp from '../assets/images/desk/Desk-flower-lamp.png';
 import monstera from '../assets/images/desk/Desk-monstera.png';
@@ -22,8 +22,11 @@ import { NavButton } from '../components/buttons/navButtons';
 import { DragItem } from '../components/drag-items';
 import JournalModal from '../components/JournalModal';
 import { Sidebar } from './Sidebar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ViewShot, { captureRef } from 'react-native-view-shot';
+import TransformBar from '@/components/transform-toolbar';
 
-export default function DeskScreen() {
+const DeskScreen = ({ onSnapshotUpdate }) => {
     const router = useRouter();
     const [journalVisible, setJournalVisible] = useState(false);
     const [gems, setGems] = useState(0);
@@ -32,11 +35,11 @@ export default function DeskScreen() {
     const [editingItems, setEditingItems] = useState(null);
     const [selectedItem, setSelectedItem] = useState<string | null>(null);
     const [openInventory, setOpenInventory] = useState(false);
-    const [storeItem, setStoreItem] = useState(null);
+    //const [storeItem, setStoreItem] = useState(null);
 
   const [deskItems, setdeskItems] = useState({
     plant: { image: monstera, x: 0, y: 400, z:2},
-    deskItem: null,
+    deskItems: null,
     wallItem: {image: wallphotos, x: 150, y: 350, z:1},
     wallpaper: null,
   });
@@ -49,24 +52,53 @@ export default function DeskScreen() {
   });
 
  const startEditing = () => {
-  setEditingItems(JSON.parse(JSON.stringify(deskItems)));
+  setEditingItems({ ...deskItems });
   setIsEditing(true);
 };
 
-  const switchStyle = (type) => {
-    if (!editingItems) return;
+//--- TRANSFORMATION TOOLBAR ACTIONS ---//
 
-    const options = inventory[type];
-    const currentItem = editingItems[type];
+const rotateItem = () => {
+    if(!selectedItem || !editingItems) return;
 
-    const currentIndex = options.indexOf(currentItem);
-    const nextIndex = (currentIndex + 1) % options.length;
+    setEditingItems(prev => {
 
-    setEditingItems(prev => ({
-      ...prev,
-      [type]: options[nextIndex],
-    }));
-  };
+        if(prev.wallItems?.[selectedItem]) {
+            const current = prev.wallItems[selectedItem];
+            const currentScale = current.scaleX ?? 1;
+
+            return {
+                ...prev,
+                wallItems: {
+                    [selectedItem]: {
+                        ...current,
+                        scaleX: current.scaleX === -1 ? 1 : -1,
+                    }
+                }
+            };
+        }
+
+        const current = prev[selectedItem];
+        const currentScale = current.scaleX ?? 1;
+        if(!current) return prev;
+
+        return {
+            ...prev,
+            [selectedItem]: {
+                ...current,
+                scaleX: currentScale === -1 ? 1 : -1,
+            },
+        };
+    });
+};
+
+// prevents onPress from resetting state when 
+// reselecting an item
+const onPress = () => {
+  if (selectedItem !== item.id) {
+    setSelectedItem(item.id);
+  }
+};
 
 // Lets the player increase the z index of selected item 
 const bringForward = () => {
@@ -102,11 +134,79 @@ const pushBack = () => {
   }));
 };
 
-// if an item of that style (e.g. bed) is already placeed,
+const storeItem = () => {
+  if (!selectedItem || !editingItems) return;
+
+  if (editingItems.wallItems?.[selectedItem]) {
+    setEditingItems(prev => {
+      const updatedWallItems = { ...prev.wallItems };
+      delete updatedWallItems[selectedItem];
+      return { ...prev, wallItems: updatedWallItems };
+    });
+    } else {
+    setEditingItems(prev => ({
+      ...prev,
+      [selectedItem]: {
+        ...prev[selectedItem],
+        image: null,
+      }
+    }));
+    setSelectedItem(null);
+  }
+};
+
+//   const switchStyle = (type) => {
+//     if (!editingItems) return;
+
+//     const options = inventory[type];
+//     const currentItem = editingItems[type];
+
+//     const currentIndex = options.indexOf(currentItem);
+//     const nextIndex = (currentIndex + 1) % options.length;
+
+//     setEditingItems(prev => ({
+//       ...prev,
+//       [type]: options[nextIndex],
+//     }));
+//   };
+
+
+//--- MAIN REDECORATE TOOLBAR ACTIONS ---//
+
+// if an item of that style (e.g. plant) is already placeed,
 // swap the image to change style
 const handlePlaceItem = (newItem) => {
     const type = newItem.tag.toLowerCase();
     
+    // items with the "desk-item" tag can have multiple items
+    // of that type added to the screen. 
+    if (type === "desk-item") {
+      const id = `desk-${Date.now()}`;
+
+    setEditingItems(prev => {
+      const maxZ = Math.max(
+        0,
+        ...Object.values(prev.wallItems || {}).map(i => i?.z ?? 0)
+      );
+
+      return {
+        ...prev,
+        wallItems: {
+          ...prev.wallItems,
+          [id]: {
+            id,
+            image: newItem.image,
+            x: 100,
+            y: 300,
+            z: 1,
+            scaleX: 1,
+          }
+        }
+      };
+    });
+// if an item of that style (e.g. plant) is already placeed,
+// swap the image to change style
+  } else {
     setEditingItems(prev => ({
         ...prev,
         [type]: {
@@ -114,8 +214,9 @@ const handlePlaceItem = (newItem) => {
             image: newItem.image // Swap the image
         }
     }));
+  }
+    setOpenInventory(false)
 };
-
     
   const cancelEditing = () => {
     setEditingItems(deskItems);
@@ -123,11 +224,25 @@ const handlePlaceItem = (newItem) => {
     setSelectedItem(null);
   };
 
+  const viewShotRef = useRef();
+
   const saveEditing = () => {
     setdeskItems(editingItems);
     setEditingItems(null);
     setIsEditing(false);
     setSelectedItem(null);
+
+    setTimeout(async () => {
+      try {
+        const uri = await captureRef(viewShotRef, {
+          format: 'jpg',
+          quality: 0.7,
+        });
+        await AsyncStorage.setItem('desk_snapshot', uri);
+      } catch (error) {
+        console.log("Snapshot failed", error);
+      }
+    }, 100);
   };
 
   const displayItems = isEditing && editingItems ? editingItems : deskItems;
@@ -162,6 +277,11 @@ const handlePlaceItem = (newItem) => {
   const { notes, handleNotePosition } = useNotes();
   const { stickers, handleStickerPosition } = useStickers();
   return (
+    <ViewShot
+        ref={viewShotRef}
+        style={{ flex: 1 }}
+        options={{ format: "jpg", quality: 0.9 }}
+    >
     <Sidebar gems={gems}>
     
     <View className="flex-1 bg-light-pink">
@@ -267,7 +387,33 @@ const handlePlaceItem = (newItem) => {
             resizeMode="contain"
         />
         </DragItem> 
-               
+      {/* This maps the items that can have multiple of that type placed */}
+      {displayItems.deskItems &&
+        Object.values(displayItems.deskItems).map(item => (
+          <DragItem
+            key={item.id}
+            item={item}
+            draggable={isEditing}
+            selected={selectedItem === item.id}
+            onPress={() => setSelectedItem(item.id)}
+            stopDrag={(id, x, y) => {
+              setEditingItems(prev => ({
+                ...prev,
+                deskItems: {
+                  ...prev.deskItems,
+                  [id]: {
+                    ...prev.deskItems[id],
+                    x,
+                    y,
+                  }
+                }
+              }));
+            }}
+          >
+            <Image source={item.image} style={{ width: 80, height: 80 }} />
+          </DragItem>
+        ))
+      }
         {/* Header */}
         {!isEditing && (
         <>
@@ -399,6 +545,16 @@ const handlePlaceItem = (newItem) => {
                 currentRoom="Desk"
             />
         )}
+        {/* TRANSFORM BAR OVERLAY */}
+        {isEditing && selectedItem && (
+            <TransformBar 
+                rotateItem={rotateItem}
+                bringForward={bringForward} 
+                pushBack={pushBack} 
+                storeItem={storeItem}
+                selectedItem={selectedItem} 
+            />
+        )}
         { isEditing ? (
             <RedecorateBar 
                 setOpenInventory={setOpenInventory} 
@@ -416,6 +572,7 @@ const handlePlaceItem = (newItem) => {
     onClose={() => setJournalVisible(false)}
     />
     </Sidebar>
+    </ViewShot>
   );
 };
 
@@ -425,3 +582,5 @@ const styles = StyleSheet.create({
         height: 200,
     }
 });
+
+export default DeskScreen;
