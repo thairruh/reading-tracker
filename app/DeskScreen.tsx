@@ -123,7 +123,7 @@ export default function DeskScreen() {
         <View className="absolute top-6 left-[85px] w-24 h-24 items-center justify-center">
             <NavButton 
             text="Profile" 
-            screenName="/"  //file name linking to profile screen
+            screenName="/profile"  //file name linking to profile screen
             btnStyle="bg-peach w-24 h-24 rounded-full"
             textStyle="ml-6 text-sm text-center"
             innerCircle="absolute bg-light-pink w-20 h-20"
