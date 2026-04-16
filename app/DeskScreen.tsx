@@ -35,7 +35,7 @@ export default function DeskScreen() {
     const [storeItem, setStoreItem] = useState(null);
 
   const [deskItems, setdeskItems] = useState({
-    plant: { image: monstera, x: 0, y: 500, z:2},
+    plant: { image: monstera, x: 0, y: 400, z:2},
     deskItem: null,
     wallItem: {image: wallphotos, x: 150, y: 350, z:1},
     wallpaper: null,
@@ -164,7 +164,7 @@ const handlePlaceItem = (newItem) => {
   return (
     <Sidebar gems={gems}>
     
-    <View className="flex-1 items-center justify-center bg-light-pink">
+    <View className="flex-1 bg-light-pink">
 
         {!isEditing}
 
@@ -237,9 +237,6 @@ const handlePlaceItem = (newItem) => {
         <View className="absolute bottom-0 w-full h-20 bg-under-desk z-0" />
 
         {/* PLANT */}
-        <View className="absolute bottom-20 left-10 right-10 w-full h-full">
-            <Image source={monstera} className='w-96 h-96 z-10' resizeMode='contain'/>
-        </View>
         <DragItem
         item={{ 
             id: 'plant', 
@@ -303,7 +300,7 @@ const handlePlaceItem = (newItem) => {
             </View>
 
         {/* Journal on desk */}
-        <View className="absolute bottom-12">
+        <View className="absolute left-20 bottom-12">
         <TouchableOpacity 
             disabled={isEditing}
             onPress={() => setJournalVisible(true)}>
@@ -338,7 +335,6 @@ const handlePlaceItem = (newItem) => {
             />
         </View>
 
-        
         { /* 'Shop' Button */ }
         <View className="absolute -bottom-20 -right-24 w-full">
             <ImgButton
@@ -414,7 +410,7 @@ const handlePlaceItem = (newItem) => {
 
 const styles = StyleSheet.create({
     plant: {
-        width: 100,
-        height: 100,
+        width: 200,
+        height: 200,
     }
 });
