@@ -35,20 +35,12 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
     const [editingItems, setEditingItems] = useState(null);
     const [selectedItem, setSelectedItem] = useState<string | null>(null);
     const [openInventory, setOpenInventory] = useState(false);
-    //const [storeItem, setStoreItem] = useState(null);
 
   const [deskItems, setdeskItems] = useState({
-    plant: { image: monstera, x: 0, y: 400, z:2},
-    deskItems: null,
-    wallItem: {image: wallphotos, x: 150, y: 350, z:1},
-    wallpaper: null,
-  });
-
-  const [inventory, setInventory] = useState({
-    plant: [aglaonema, peacelily],
-    deskItem: [flowerlamp],
-    wallItem: [wallphotos],
-    wallpaper: [wallpaper1],
+    plant: { image: monstera, x: 0, y: 400, z:2, scaleX: 1},
+    deskItem: {},
+    wallItem: {image: null, x: 150, y: 350, z:1, scaleX: 1},
+    wallpaper: {image: null, x: 150, y: 350, z:1, scaleX: 1},
   });
 
  const startEditing = () => {
@@ -63,13 +55,13 @@ const rotateItem = () => {
 
     setEditingItems(prev => {
 
-        if(prev.wallItems?.[selectedItem]) {
-            const current = prev.wallItems[selectedItem];
+        if(prev.deskItem?.[selectedItem]) {
+            const current = prev.deskItem[selectedItem];
             const currentScale = current.scaleX ?? 1;
 
             return {
                 ...prev,
-                wallItems: {
+                deskItem: {
                     [selectedItem]: {
                         ...current,
                         scaleX: current.scaleX === -1 ? 1 : -1,
@@ -137,11 +129,11 @@ const pushBack = () => {
 const storeItem = () => {
   if (!selectedItem || !editingItems) return;
 
-  if (editingItems.wallItems?.[selectedItem]) {
+  if (editingItems.deskItem?.[selectedItem]) {
     setEditingItems(prev => {
-      const updatedWallItems = { ...prev.wallItems };
-      delete updatedWallItems[selectedItem];
-      return { ...prev, wallItems: updatedWallItems };
+      const updatedDeskItems = { ...prev.deskItem };
+      delete updatedDeskItems[selectedItem];
+      return { ...prev, deskItem: updatedDeskItems };
     });
     } else {
     setEditingItems(prev => ({
@@ -154,22 +146,6 @@ const storeItem = () => {
     setSelectedItem(null);
   }
 };
-
-//   const switchStyle = (type) => {
-//     if (!editingItems) return;
-
-//     const options = inventory[type];
-//     const currentItem = editingItems[type];
-
-//     const currentIndex = options.indexOf(currentItem);
-//     const nextIndex = (currentIndex + 1) % options.length;
-
-//     setEditingItems(prev => ({
-//       ...prev,
-//       [type]: options[nextIndex],
-//     }));
-//   };
-
 
 //--- MAIN REDECORATE TOOLBAR ACTIONS ---//
 
@@ -186,18 +162,18 @@ const handlePlaceItem = (newItem) => {
     setEditingItems(prev => {
       const maxZ = Math.max(
         0,
-        ...Object.values(prev.wallItems || {}).map(i => i?.z ?? 0)
+        ...Object.values(prev.deskItem || {}).map(i => i?.z ?? 0)
       );
 
       return {
         ...prev,
-        wallItems: {
-          ...prev.wallItems,
+        deskItem: {
+          ...prev.deskItem,
           [id]: {
             id,
             image: newItem.image,
-            x: 100,
-            y: 300,
+            x: 0,
+            y: 400,
             z: 1,
             scaleX: 1,
           }
@@ -356,8 +332,32 @@ const handlePlaceItem = (newItem) => {
         {/* Underdesk */}
         <View className="absolute bottom-0 w-full h-20 bg-under-desk z-0" />
 
+    {/* WALL ITEM */}
+    {displayItems.wallItem.image && (
+        <DragItem
+        item={{ 
+            id: 'wallItem', 
+            x: displayItems.wallItem.x, 
+            y: displayItems.wallItem.y, 
+            z: displayItems.wallItem.z,
+            scaleX: displayItems.wallItem.scaleX ?? 1,
+        }}
+        draggable={isEditing}
+        selected={isEditing && selectedItem === 'wallItem'}
+        onPress={() => setSelectedItem('wallItem')}
+        stopDrag={(id, x, y) => {
+            if (isEditing) {
+            setEditingItems(prev => ({
+                ...prev,
+                [id]: { ...prev[id], x, y }
+            }));
+            }
+        }}
+        >
+        <Image source={displayItems.wallItem.image} style={{width:100, height:100}} contentFit="contain" />
+        </DragItem>
+    )}
         {/* PLANT */}
-        
         <DragItem
         item={{ 
             id: 'plant', 
@@ -387,9 +387,10 @@ const handlePlaceItem = (newItem) => {
             resizeMode="contain"
         />
         </DragItem> 
+
       {/* This maps the items that can have multiple of that type placed */}
-      {displayItems.deskItems &&
-        Object.values(displayItems.deskItems).map(item => (
+      {displayItems.deskItem &&
+        Object.values(displayItems.deskItem).map(item => (
           <DragItem
             key={item.id}
             item={item}
@@ -399,10 +400,10 @@ const handlePlaceItem = (newItem) => {
             stopDrag={(id, x, y) => {
               setEditingItems(prev => ({
                 ...prev,
-                deskItems: {
-                  ...prev.deskItems,
+                deskItem: {
+                  ...prev.deskItem,
                   [id]: {
-                    ...prev.deskItems[id],
+                    ...prev.deskItem[id],
                     x,
                     y,
                   }
@@ -539,7 +540,6 @@ const handlePlaceItem = (newItem) => {
         {/* INVENTORY OVERLAY */}
         {isEditing && openInventory && (
             <Inventory
-                setIsEditing={setIsEditing}
                 setOpenInventory={setOpenInventory} 
                 onPlaceItem={handlePlaceItem} 
                 currentRoom="Desk"

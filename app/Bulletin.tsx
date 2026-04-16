@@ -10,6 +10,7 @@ import sticker1 from '../assets/stickers/first-entry.png';
 import sticker2 from '../assets/stickers/first-friend.png';
 import AddSticker from '@/components/add-sticker';
 import { useStickers } from '@/components/StickerContext';
+import info from '../assets/images/info.png';
 
 interface PositionNote {
   id: number;
@@ -171,6 +172,25 @@ export default function Bulletin() {
                 </View>
             </View>
 
+            {!isVisible && (
+                <View style={{width: '70%', height: 50, backgroundColor:'#EEDBD3', alignSelf: 'center'}}
+                    className="absolute top-32">
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
+                        <Image source={info} style={{ width: 24, height:24, marginLeft:10}}/>
+                        <Text style={{ marginLeft:8 }}>Tap on the bulletin to edit its style.</Text>
+                    </View>
+                </View>
+            )}
+            {isVisible && (
+                <View style={{width: '80%', height: 60, backgroundColor:'#EEDBD3', alignSelf: 'center'}}
+                    className="absolute top-24">
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
+                        <Image source={info} style={{ width: 24, height:24, marginLeft:10}}/>
+                        <Text style={{ marginLeft:8 }}>Tap on a note or sticker to edit, or delete.{"\n"}Drag to move the item.</Text>
+                    </View>
+                </View>
+            )}
+
              {/* Make Edit Bar visible when bulletin is pressed */}
             {isVisible && (
                 <View className="flex-row absolute bottom-0 ml-10 w-full h-full">
@@ -197,7 +217,8 @@ export default function Bulletin() {
                         </View>
                         </View>
                     )}
-                </View> 
+                </View>
+                
             )}
         </View>    
     </TouchableWithoutFeedback>

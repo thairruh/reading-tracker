@@ -31,7 +31,7 @@ const Inventory = ({ setOpenInventory, onPlaceItem, currentRoom }) => {
         { id: 'flower-lamp', name: "Flower Lamp", image: flowerLamp, category: "Desk", tag:"deskItem, favorited: false"},
         { id: 'aglaonema', name: "Aglaonema", image: aglaonema, category: "Desk", tag:'plant', favorited: true },
         { id: 'peacelily', name: "Peacelily", image: peacelily, category: "Desk", tag:'plant', favorited: false },
-        { id: 'wall-photos', name: "Wall photos", image: wallphotos, category: "Desk", tag:'wallitem', favorited: true },
+        { id: 'wall-photos', name: "Wall photos", image: wallphotos, category: "Desk", tag:'wallItem', favorited: true },
         { id: 'wallpaper-1', name: "Wall paper 1", image: wallpaper1, category: "Desk", tag:'wallpaper', favorited: false },
     ];
 
