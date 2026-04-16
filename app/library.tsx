@@ -90,9 +90,10 @@ const Library = () => {
         {selectedBook && (
           <ViewBook
             title={selectedBook.title}
-            start={selectedBook.start}
-            finish={selectedBook.finish}
+            startDate={selectedBook.startDate?.toLocaleDateString()}
+            finishDate={selectedBook.finishDate?.toLocaleDateString()}
             status={selectedBook.status}
+            rating ={selectedBook.rating}
             onClose={() => {
               setViewBook(false)
               setSelectedBook(null);}}

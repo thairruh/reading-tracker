@@ -1,18 +1,26 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Checkbox } from 'expo-checkbox';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Dimensions, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import starFilled from '../assets/images/starFilled.png';
 import starOutline from '../assets/images/starOutline.png';
 import x from '../assets/images/x.png';
 
 const AddBook = ({ setBook, onClose }) => { 
 
+    const [title, setTitle] = useState(''); 
     const[rating, setRating] = useState(0);
+    const[status, setStatus] = useState('In Progress') 
     const [startDate, setStartDate] = useState(new Date());
     const [finishDate, setFinishDate] = useState(new Date());
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showFinishPicker, setShowFinishPicker] = useState(false);
+   
+    //for completed/dropped checkboxes 
+    const [isCompleted, setCompleted] = useState(false); 
+    const [isDropped, setDropped] = useState(false); 
+        
+        
 
     // possible colors and height's that the added books can be 
     const colors = ['#E5BABA', '#B7B7C6', '#BBC6B7']; 
@@ -20,15 +28,20 @@ const AddBook = ({ setBook, onClose }) => {
     
     //randomly choose a color and height from each array 
     const handleAddBook = () => { 
-            
+        
+        if (!title.trim()) {
+            Alert.alert("Missing Information", "Please enter a book title.");
+            return;
+        }
+
         const randomColor = colors[Math.floor(Math.random() * colors.length)]; 
         const randomHeight = heights[Math.floor(Math.random() * heights.length)]; 
 
         const newBook = { 
             id: Date.now(), 
             title: title, 
-            startDate: start, 
-            finishDate: finish, 
+            startDate: startDate, 
+            finishDate: finishDate, 
             status: status, 
             rating: rating,
             color: randomColor, 
@@ -42,17 +55,6 @@ const AddBook = ({ setBook, onClose }) => {
         // Makes the lines for the paper 
         const lines = Array.from({ length: Math.floor(Dimensions.get('window').height / 50) }) 
         
-        //for input fields 
-        const [title, setTitle] = useState(''); 
-        const [start, setStart] = useState(''); 
-        const [finish, setFinish] = useState(''); 
-        
-        //for completed/dropped checkboxes 
-        const [isCompleted, setCompleted] = useState(false); 
-        const [isDropped, setDropped] = useState(false); 
-        
-        // status 
-        const[status, setStatus] = useState('In Progress') 
         useEffect(() => {
             if (isCompleted) setStatus('Completed');
             else if (isDropped) setStatus('Dropped');
@@ -91,7 +93,7 @@ const AddBook = ({ setBook, onClose }) => {
             <View style={styles.formContainer}>
 
                 <View className="flex-row items-center"> 
-                    <Text style={styles.font}>Title:</Text> 
+                    <Text style={styles.font}>*Title:</Text> 
                     <TextInput style={styles.input} placeholder="Type here..." onChangeText={newText => setTitle(newText)} value={title} /> 
                 </View> 
 
