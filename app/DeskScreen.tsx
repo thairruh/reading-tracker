@@ -237,6 +237,7 @@ const handlePlaceItem = (newItem) => {
         <View className="absolute bottom-0 w-full h-20 bg-under-desk z-0" />
 
         {/* PLANT */}
+        
         <DragItem
         item={{ 
             id: 'plant', 
@@ -265,8 +266,11 @@ const handlePlaceItem = (newItem) => {
             style={styles.plant} 
             resizeMode="contain"
         />
-        </DragItem>        
+        </DragItem> 
+               
         {/* Header */}
+        {!isEditing && (
+        <>
         <Image
         source={require('../figma-icons/header-lg.png')}
         className="absolute w-full"
@@ -298,7 +302,8 @@ const handlePlaceItem = (newItem) => {
                 </Text>
             </View>
             </View>
-
+            </>
+        )}
         {/* Journal on desk */}
         <View className="absolute left-20 bottom-12">
         <TouchableOpacity 
@@ -314,6 +319,8 @@ const handlePlaceItem = (newItem) => {
 
         {/* Navigation Buttons */}
         { /* 'Profile' Button */ }
+        {!isEditing && (
+        <>
         <View className="absolute top-6 left-[85px] w-24 h-24 items-center justify-center">
             <NavButton 
             text="Profile" 
@@ -369,10 +376,12 @@ const handlePlaceItem = (newItem) => {
             innerCircle="absolute bg-peach w-44 h-44"
             /> */}
         </View>
+        </>
+        )}
       {/* REDECORATE INSTRUCTIONS BOX */}
       {isEditing && (
         <View style={{width: '70%', height: 50, backgroundColor:'#EEDBD3', alignSelf: 'center'}}
-            className="absolute top-28">
+            className="absolute top-24">
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
             <Image source={info} style={{ width: 24, height:24, marginLeft:10}}/>
             <Text style={{ marginLeft:8 }}>Tap on an item to change its style.</Text>
@@ -388,7 +397,7 @@ const handlePlaceItem = (newItem) => {
             />
         )}
         { isEditing && (
-            <View className="flex-row absolute bottom-0 ml-9 w-full h-full">
+            <View className="flex-row absolute bottom-0 ml-5 w-full h-full">
                 <RedecorateEditBar 
                     cancelEditing={cancelEditing}
                     pushBack={pushBack}
