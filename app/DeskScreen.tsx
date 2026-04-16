@@ -16,7 +16,7 @@ import monstera from '../assets/images/desk/Desk-monstera.png';
 import aglaonema from '../assets/images/desk/desk-plant-aglaonema.png';
 import peacelily from '../assets/images/desk/desk-plant-peacelily .png';
 import wallphotos from '../assets/images/desk/Desk-wall-photos.png';
-import wallpaper1 from '../assets/images/desk/desk-wallpaper-1.png';
+import wallpaper1 from '../assets/images/desk/Desk-wallpaper-1.png';
 import info from '../assets/images/info.png';
 import { NavButton } from '../components/buttons/navButtons';
 import { DragItem } from '../components/drag-items';
