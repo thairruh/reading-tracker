@@ -1,18 +1,12 @@
 import Inventory from '@/components/inventory';
+import TransformBar from '@/components/transform-toolbar';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import squareRug from '../assets/images/bedroom/Bedroom-circle-rug.png';
-import flowerPhoto from '../assets/images/bedroom/Bedroom-flower-photo.png';
-import blueFrillyBed from '../assets/images/bedroom/Bedroom-frilly-bed-blue.png';
 import bookshelf from '../assets/images/bedroom/BR-bookshelf-plain.png';
-import whiteShelf from '../assets/images/bedroom/br-bookshelf-white.png';
-import pinkCheckerBed from '../assets/images/bedroom/Br-checker-bed-pink.png';
 import floor from '../assets/images/bedroom/BR-floor-wood-light.png';
 import plainBed from '../assets/images/bedroom/Br-plain-bed.png';
-import plainTable from '../assets/images/bedroom/br-plain-table.png';
-import flowerRug from '../assets/images/bedroom/BR-square-rug-lightblue .png';
 import info from '../assets/images/info.png';
 import { DragItem } from '../components/drag-items';
 import CustomHeader from '../components/header';
@@ -24,47 +18,69 @@ const Bedroom = () => {
   const [editingItems, setEditingItems] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [openInventory, setOpenInventory] = useState(false);
-  const [storeItem, setStoreItem] = useState(null);
   
 
   const [roomItems, setRoomItems] = useState({
-    bed: { image: plainBed, x: 0, y: 500, z:2},
-    bookshelf: {image: bookshelf, x: 150, y: 350, z:1},
-    rug: null,
-    table: null,
-    wallItem1: null,
-    wallItem2: null,
-    wallpaper: null,
+    bed: { image: plainBed, x: 0, y: 500, z:2, scaleX: 1},
+    bookshelf: {image: bookshelf, x: 150, y: 350, z:1, scaleX: 1},
+    rug: {image: null, x: 150, y: 450, z:1, scaleX: 1},
+    table: {image: null, x: 250, y: 450, z:1, scaleX: 1},
+    wallpaper: {image: null, x: 150, y: 350, z:1, scaleX: 1},
     floor: floor,
+    wallItems: {}
   });
 
-  const [inventory, setInventory] = useState({
-    bed: [pinkCheckerBed, blueFrillyBed],
-    bookshelf: [whiteShelf],
-    rug: [flowerRug, squareRug],
-    table: [plainTable],
-    wallItem: [flowerPhoto]
-  });
 
  const startEditing = () => {
-  setEditingItems(JSON.parse(JSON.stringify(roomItems)));
+  setEditingItems({ ...roomItems });
   setIsEditing(true);
 };
 
-  const switchStyle = (type) => {
-    if (!editingItems) return;
+//--- TRANSFORMATION TOOLBAR ACTIONS ---//
 
-    const options = inventory[type];
-    const currentItem = editingItems[type];
+const rotateItem = () => {
+  if (!selectedItem || !editingItems) return;
 
-    const currentIndex = options.indexOf(currentItem);
-    const nextIndex = (currentIndex + 1) % options.length;
+  setEditingItems(prev => {
+    
+    if (prev.wallItems?.[selectedItem]) {
+      const current = prev.wallItems[selectedItem];
+      const currentScale = current.scaleX ?? 1;
 
-    setEditingItems(prev => ({
+      return {
+        ...prev,
+        wallItems: {
+          ...prev.wallItems,
+          [selectedItem]: {
+            ...current,
+            scaleX: current.scaleX === -1 ? 1 : -1,
+          }
+        }
+      };
+    }
+    
+    const current = prev[selectedItem];
+    const currentScale = current.scaleX ?? 1;
+    if (!current) return prev;
+
+
+    return {
       ...prev,
-      [type]: options[nextIndex],
-    }));
-  };
+      [selectedItem]: {
+        ...current,
+        scaleX: currentScale === -1 ? 1 : -1,
+      },
+    };
+  });
+};
+
+// prevents onPress from resetting state when 
+// reselecting an item
+const onPress = () => {
+  if (selectedItem !== item.id) {
+    setSelectedItem(item.id);
+  }
+};
 
 // Lets the player increase the z index of selected item 
 const bringForward = () => {
@@ -100,11 +116,60 @@ const pushBack = () => {
   }));
 };
 
+const storeItem = () => {
+  if (!selectedItem || !editingItems) return;
+
+  if (editingItems.wallItems?.[selectedItem]) {
+    setEditingItems(prev => {
+      const updatedWallItems = { ...prev.wallItems };
+      delete updatedWallItems[selectedItem];
+      return { ...prev, wallItems: updatedWallItems };
+    });
+    } else {
+    setEditingItems(prev => ({
+      ...prev,
+      [selectedItem]: {
+        ...prev[selectedItem],
+        image: null,
+      }
+    }));
+    setSelectedItem(null);
+  }
+};
+
+//--- MAIN REDECORATE TOOLBAR ACTIONS ---//
+
 // if an item of that style (e.g. bed) is already placeed,
 // swap the image to change style
 const handlePlaceItem = (newItem) => {
     const type = newItem.tag.toLowerCase();
     
+    if (type === "wall-item") {
+      const id = `wall-${Date.now()}`;
+
+    setEditingItems(prev => {
+      const maxZ = Math.max(
+        0,
+        ...Object.values(prev.wallItems || {}).map(i => i?.z ?? 0)
+      );
+
+      return {
+        ...prev,
+        wallItems: {
+          ...prev.wallItems,
+          [id]: {
+            id,
+            image: newItem.image,
+            x: 100,
+            y: 300,
+            z: 1,
+            scaleX: 1,
+          }
+        }
+      };
+    });
+
+  } else {
     setEditingItems(prev => ({
         ...prev,
         [type]: {
@@ -112,9 +177,10 @@ const handlePlaceItem = (newItem) => {
             image: newItem.image // Swap the image
         }
     }));
+  }
+    setOpenInventory(false)
 };
 
-    
   const cancelEditing = () => {
     setEditingItems(roomItems);
     setIsEditing(false);
@@ -138,10 +204,10 @@ const handlePlaceItem = (newItem) => {
 
       {/* REDECORATE INSTRUCTIONS BOX */}
       {isEditing && (
-        <View style={{width: '70%', height: 50, backgroundColor:'#EEDBD3',alignSelf: 'center', marginTop: 100}}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
-            <Image source={info} style={{ width: 24, height:24, marginLeft:15}}/>
-            <Text style={{ marginLeft:8 }}>Tap on an item to change its style.</Text>
+        <View className="w-[70%] h-[60px] bg-[#EED8D3] self-center mt-[100px]">
+          <View className="flex-row items-center mt-[15px]">
+            <Image source={info} className="w-[24px] h-[24px] ml-[15px]"/>
+            <Text className="ml-2">{"Drag an item to move it.\nChange its style from the inventory."}</Text>
           </View>
         </View>
       )}
@@ -151,12 +217,8 @@ const handlePlaceItem = (newItem) => {
         <View style={styles.wallOverlay} />
     </View>
 
-
-    <Pressable 
-      disabled={!isEditing} 
-      onPress={() => switchStyle('floor')} 
-      pointerEvents="box-none"
-    >
+    {/* FLOOR */}
+    <Pressable disabled={!isEditing} pointerEvents="box-none">
       <Image source={displayItems.floor} style={styles.floor} contentFit="contain"/>
     </Pressable>
 
@@ -166,7 +228,8 @@ const handlePlaceItem = (newItem) => {
         id: 'bed', 
         x: displayItems.bed.x, 
         y: displayItems.bed.y, 
-        z: displayItems.bed.z 
+        z: displayItems.bed.z, 
+        scaleX: displayItems.bed.scaleX ?? 1, 
       }}
       draggable={isEditing}
       selected={isEditing && selectedItem === 'bed'}
@@ -175,11 +238,7 @@ const handlePlaceItem = (newItem) => {
       if (isEditing) {
         setEditingItems(prev => ({
           ...prev,
-          [id]: {
-            ...prev[id],
-            x,
-            y
-          }
+          [id]: {...prev[id], x, y}
         }));
       }
     }}
@@ -199,7 +258,8 @@ const handlePlaceItem = (newItem) => {
         id: 'bookshelf', 
         x: displayItems.bookshelf.x, 
         y: displayItems.bookshelf.y, 
-        z: displayItems.bookshelf.z 
+        z: displayItems.bookshelf.z,
+        scaleX: displayItems.bookshelf.scaleX ?? 1,  
       }}
       draggable={isEditing}
       selected={isEditing && selectedItem === 'bookshelf'}
@@ -208,11 +268,7 @@ const handlePlaceItem = (newItem) => {
         if (isEditing) {
           setEditingItems(prev => ({
             ...prev,
-            [id]: {
-              ...prev[id],
-              x,
-              y
-            }
+            [id]: { ...prev[id], x, y}
           }));
         }
       }}
@@ -226,11 +282,100 @@ const handlePlaceItem = (newItem) => {
     </View>
     </DragItem>
 
+    {/* RUG */}
+{displayItems.rug.image && (
+  <DragItem
+    item={{ 
+      id: 'rug', 
+      x: displayItems.rug.x, 
+      y: displayItems.rug.y, 
+      z: displayItems.rug.z,
+      scaleX: displayItems.rug.scaleX ?? 1,
+    }}
+    draggable={isEditing}
+    selected={isEditing && selectedItem === 'rug'}
+    onPress={() => setSelectedItem('rug')}
+    stopDrag={(id, x, y) => {
+      if (isEditing) {
+        setEditingItems(prev => ({
+          ...prev,
+          [id]: { ...prev[id], x, y }
+        }));
+      }
+    }}
+  >
+    <Image source={displayItems.rug.image} style={{width:300, height:300}}contentFit="contain" />
+  </DragItem>
+)}
+
+{/* TABLE */}
+{displayItems.table.image && (
+  <DragItem
+    item={{ 
+      id: 'table', 
+      x: displayItems.table.x, 
+      y: displayItems.table.y, 
+      z: displayItems.table.z,
+      scaleX: displayItems.table.scaleX ?? 1,
+    }}
+    draggable={isEditing}
+    selected={isEditing && selectedItem === 'table'}
+    onPress={() => setSelectedItem('table')}
+    stopDrag={(id, x, y) => {
+      if (isEditing) {
+        setEditingItems(prev => ({
+          ...prev,
+          [id]: { ...prev[id], x, y }
+        }));
+      }
+    }}
+  >
+    <Image source={displayItems.table.image} style={{width:300, height:200}} contentFit="contain" />
+  </DragItem>
+)}
+
+    {displayItems.wallItems &&
+      Object.values(displayItems.wallItems).map(item => (
+        <DragItem
+          key={item.id}
+          item={item}
+          draggable={isEditing}
+          selected={selectedItem === item.id}
+          onPress={() => setSelectedItem(item.id)}
+          stopDrag={(id, x, y) => {
+            setEditingItems(prev => ({
+              ...prev,
+              wallItems: {
+                ...prev.wallItems,
+                [id]: {
+                  ...prev.wallItems[id],
+                  x,
+                  y,
+                }
+              }
+            }));
+          }}
+        >
+          <Image source={item.image} style={{ width: 80, height: 80 }} />
+        </DragItem>
+      ))
+    }
+
     {/* INVENTORY OVERLAY */}
     {isEditing && openInventory && (
       <Inventory 
         setOpenInventory={setOpenInventory} 
         onPlaceItem={handlePlaceItem} 
+      />
+    )}
+
+    {isEditing && selectedItem && (
+      <TransformBar 
+        rotateItem={rotateItem}
+        bringForward={bringForward} 
+        pushBack={pushBack} 
+        storeItem={storeItem}
+        selectedItem={selectedItem} 
       />
     )}
 
@@ -295,7 +440,8 @@ const styles = StyleSheet.create({
     borderColor: '#aaa', 
     borderStyle: 'dashed', 
     justifyContent: 'center', 
-    alignItems: 'center', }
+    alignItems: 'center', 
+  }
 });
 
 export default Bedroom;

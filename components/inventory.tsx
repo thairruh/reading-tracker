@@ -7,6 +7,7 @@ import whiteShelf from '../assets/images/bedroom/br-bookshelf-white.png';
 import plainTable from '../assets/images/bedroom/br-plain-table.png';
 import x from '../assets/images/x.png';
 
+
 const Inventory = ({ setIsEditing, setOpenInventory, onPlaceItem }) => {
     const [activeTab, setActiveTab] = useState('Bedroom');
 
@@ -25,8 +26,11 @@ const Inventory = ({ setIsEditing, setOpenInventory, onPlaceItem }) => {
         <View className='absolute w-full h-full bg-black/30'/>
 
         <View className="w-full top-[20px] left-[20px] z-50">
-            <Pressable onPress={() => setOpenInventory(false)} >
-            <Image source={x} style={{ width: 36, height: 36 }}/>
+            <Pressable 
+              onPress={() => setOpenInventory(false)} 
+              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+            >
+              <Image source={x} className="w-[36px] h-[36px]"/>
             </Pressable>
         </View>
        
@@ -35,11 +39,11 @@ const Inventory = ({ setIsEditing, setOpenInventory, onPlaceItem }) => {
                 
             <View className="flex-row flex-wrap justify-center mt-5">
                 {filteredItems.map(item => (
-                    <View className="items-center">
+                    <View key={item.id} className="items-center">
                         <TouchableOpacity 
-                            key={item.id}
-                            {...item} 
-                            onPress={() => onPlaceItem(item)}
+                            onPress={() => {
+                              console.log("INVENTORY CLICKED:", item); 
+                              onPlaceItem(item);}}
                             style={styles.itemCard}
                         >
                             <Image source={item.image} className="w-[100px] h-[100px]" resizeMode="contain" />
