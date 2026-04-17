@@ -125,11 +125,6 @@ const pushBack = () => {
 const storeItem = () => {
     if (!selectedItem || !editingItems) return;
 
-    if (selectedItem === 'wallpaper') {
-        setSelectedItem(null);
-        return;
-    }
-
     if (editingItems.deskItem?.[selectedItem]) {
     setEditingItems(prev => {
         const updatedDeskItems = { ...prev.deskItem };
@@ -281,11 +276,14 @@ const handlePlaceItem = (newItem) => {
                 {isEditing && displayItems.wallpaper.image && (
                     <Pressable 
                         onPress={() => setSelectedItem('wallpaper')}
+                        style={[
+                            StyleSheet.absoluteFill,
+                            { zIndex: 1 },
+                        ]}
                     />
                 )}
             </View>
             
-
         <Stack.Screen options={{ headerShown: false, contentStyle: { paddingTop: 0, marginTop: 0 }  }} />
 
         {/* Bulletin Board */}
