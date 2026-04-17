@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import CustomHeader from '../components/banner';
 import Tabs from '../components/tabs';
-import { imageMap } from "../scripts/imageMap";
+import { imageMap } from "../scripts/image-map";
 import { db } from "../src/firebase/config";
 import { getShopItems, getCurrentUserInventory, purchaseItem } from '../src/firebase/shop';
 

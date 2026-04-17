@@ -34,6 +34,7 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
       selectedItem, setSelectedItem,
       openInventory, setOpenInventory,
       roomItems, viewShotRef, displayItems,
+      isLoading,
       startEditing, cancelEditing, saveEditing,
       rotateItem, bringForward, pushBack,
       storeItem, handlePlaceItem, stopDrag,
@@ -85,6 +86,15 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
     };
   const { notes, handleNotePosition } = useNotes();
   const { stickers, handleStickerPosition } = useStickers();
+
+    if (isLoading || !displayItems) {
+  return (
+    <View style={{ flex: 1, backgroundColor: '#FAECEC' }}>
+      <View style={{ flex: 1, opacity: 0.98 }} />
+    </View>
+  );
+}
+
   return (
     <ViewShot
         ref={viewShotRef}
@@ -431,8 +441,9 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
     visible={journalVisible}
     onClose={() => setJournalVisible(false)}
     />
-    </ViewShot>
+    
     </Sidebar>
+    </ViewShot>
     
   );
 };

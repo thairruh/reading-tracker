@@ -23,6 +23,7 @@ const Bedroom = ({ onSnapshotUpdate}) => {
       openInventory, setOpenInventory,
       displayItems, viewShotRef,
       startEditing, cancelEditing, saveEditing,
+      isLoading,
       rotateItem, bringForward, pushBack,
       storeItem, handlePlaceItem, stopDrag,
     } = useRoomEditor(
@@ -40,6 +41,13 @@ const Bedroom = ({ onSnapshotUpdate}) => {
       'bedroom'
     );
 
+    if (isLoading || !displayItems) {
+  return (
+    <View style={{ flex: 1, backgroundColor: '#FAECEC' }}>
+      <View style={{ flex: 1, opacity: 0.98 }} />
+    </View>
+  );
+}
     
   return (
     // Wrap the Screen in ViewShot so that the Where to Next screen can

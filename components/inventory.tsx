@@ -11,7 +11,7 @@ import {
 import x from "../assets/images/x.png";
 import CustomHeader from "./banner";
 import { getCurrentUserInventory, getShopItems } from "@/src/firebase/shop";
-import { imageMap } from "../scripts/imageMap";
+import { imageMap } from "../scripts/image-map";
 
 type InventoryProps = {
   setOpenInventory: (open: boolean) => void;
@@ -28,6 +28,16 @@ const tagMap: Record<string, string> = {
   "desk-item": "deskItem",
   "knick-knacks": "deskItem",
   "knick-knack": "deskItem",
+};
+
+const sizeMap: Record<string, { width: number; height: number }> = {
+  "desk/Desk-flower-lamp.png": { width: 160, height: 200 },
+  "desk/desk-bunny.png": { width: 140, height: 140 },
+  "desk/White-frame-desk-photo.png": { width: 80, height: 110 },
+  "desk/Desk-radio.png": { width: 140, height: 120 },
+  "desk/Desk-monstera.png": { width: 160, height: 160 },
+  "desk/desk-plant-aglaonema.png": { width: 140, height: 140 },
+  "desk/desk-plant-peacelily.png": { width: 140, height: 140 },
 };
 
 export default function Inventory({
@@ -57,7 +67,10 @@ export default function Inventory({
           .map((item: any) => ({
             ...item,
             image: imageMap[item.image],
+            imageKey: item.image, // keep original key for saving back to DB
             tag: tagMap[item.tag?.toLowerCase()] ?? item.tag,
+            width: sizeMap[item.image]?.width ?? 120,
+            height: sizeMap[item.image]?.height ?? 120,
           }))
           .filter((item: any) => item.image); // avoid crashing if image path is missing
 
