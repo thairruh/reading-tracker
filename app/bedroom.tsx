@@ -3,7 +3,7 @@ import TransformBar from '@/components/transform-toolbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import bookshelf from '../assets/images/bedroom/BR-bookshelf-plain.png';
@@ -32,6 +32,21 @@ const Bedroom = ({ onSnapshotUpdate}) => {
     floor: floor,
     wallItems: {}
   });
+
+  useEffect(() => {
+    const loadBedroomItems = async () => {
+      try {
+        const saved = await AsyncStorage.getItem('bedroom_items');
+        if (saved) {
+          setRoomItems(JSON.parse(saved));
+        }
+      } catch (error) {
+        console.log('Failed to load bedroom items', error);
+      }
+    };
+
+    loadBedroomItems();
+  }, []);
 
 
  const startEditing = () => {
@@ -196,11 +211,19 @@ const handlePlaceItem = (newItem) => {
   const viewShotRef = useRef();
 
   const saveEditing = async () => {
+    if (!editingItems) return;
+
     setRoomItems(editingItems);
     setEditingItems(null);
     setIsEditing(false);
     setSelectedItem(null);
-    
+
+    try {
+      await AsyncStorage.setItem('bedroom_items', JSON.stringify(editingItems));
+    } catch (error) {
+      console.log('Failed to save bedroom items', error);
+    }
+
     setTimeout(async () => {
       try {
         const uri = await captureRef(viewShotRef, {
@@ -209,7 +232,7 @@ const handlePlaceItem = (newItem) => {
         });
         await AsyncStorage.setItem('bedroom_snapshot', uri);
       } catch (error) {
-        console.log("Snapshot failed", error);
+        console.log('Bedroom snapshot failed', error);
       }
     }, 100);
   };

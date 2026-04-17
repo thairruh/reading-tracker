@@ -206,26 +206,51 @@ const handlePlaceItem = (newItem) => {
 
   const viewShotRef = useRef();
 
-  const saveEditing = () => {
+  const saveEditing = async () => {
+    if (!editingItems) return;
+
+    // update UI
     setdeskItems(editingItems);
     setEditingItems(null);
     setIsEditing(false);
     setSelectedItem(null);
 
+    // save actual layout
+    try {
+        await AsyncStorage.setItem('desk_items', JSON.stringify(editingItems));
+    } catch (error) {
+        console.log('Failed to save desk items', error);
+    }
+
     setTimeout(async () => {
-      try {
+        try {
         const uri = await captureRef(viewShotRef, {
-          format: 'jpg',
-          quality: 0.7,
+            format: 'jpg',
+            quality: 0.7,
         });
         await AsyncStorage.setItem('desk_snapshot', uri);
-      } catch (error) {
+        } catch (error) {
         console.log("Snapshot failed", error);
-      }
+        }
     }, 100);
-  };
+    };
 
   const displayItems = isEditing && editingItems ? editingItems : deskItems;
+
+    useEffect(() => {
+        const loadDeskItems = async () => {
+            try {
+            const saved = await AsyncStorage.getItem('desk_items');
+            if (saved) {
+                setdeskItems(JSON.parse(saved));
+            }
+            } catch (error) {
+            console.log('Failed to load desk items', error);
+            }
+        };
+
+        loadDeskItems();
+    }, []);
 
     // load journal image into cache for smoother performance when opening journal modal
     useEffect(() => {
