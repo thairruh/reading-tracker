@@ -11,12 +11,7 @@ import { Stack, useRouter } from 'expo-router';
 import { doc, onSnapshot } from 'firebase/firestore';
 import React, { useRef, useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import flowerlamp from '../assets/images/desk/Desk-flower-lamp.png';
 import monstera from '../assets/images/desk/Desk-monstera.png';
-import aglaonema from '../assets/images/desk/desk-plant-aglaonema.png';
-import peacelily from '../assets/images/desk/desk-plant-peacelily .png';
-import wallphotos from '../assets/images/desk/Desk-wall-photos.png';
-import wallpaper1 from '../assets/images/desk/Desk-wallpaper-1.png';
 import info from '../assets/images/info.png';
 import { NavButton } from '../components/buttons/navButtons';
 import { DragItem } from '../components/drag-items';
@@ -128,21 +123,26 @@ const pushBack = () => {
 };
 
 const storeItem = () => {
-  if (!selectedItem || !editingItems) return;
+    if (!selectedItem || !editingItems) return;
 
-  if (editingItems.deskItem?.[selectedItem]) {
+    if (selectedItem === 'wallpaper') {
+        setSelectedItem(null);
+        return;
+    }
+
+    if (editingItems.deskItem?.[selectedItem]) {
     setEditingItems(prev => {
-      const updatedDeskItems = { ...prev.deskItem };
-      delete updatedDeskItems[selectedItem];
-      return { ...prev, deskItem: updatedDeskItems };
+        const updatedDeskItems = { ...prev.deskItem };
+        delete updatedDeskItems[selectedItem];
+        return { ...prev, deskItem: updatedDeskItems };
     });
     } else {
-    setEditingItems(prev => ({
-      ...prev,
-      [selectedItem]: {
-        ...prev[selectedItem],
-        image: null,
-      }
+        setEditingItems(prev => ({
+        ...prev,
+        [selectedItem]: {
+            ...prev[selectedItem],
+            image: null,
+        }
     }));
     setSelectedItem(null);
   }
@@ -261,38 +261,33 @@ const handlePlaceItem = (newItem) => {
         options={{ format: "jpg", quality: 0.9 }}
     >
     <Sidebar gems={gems}>
-    
-    <View className="flex-1 bg-light-pink">
 
         {!isEditing}
+        
+        {/* WALLPAPER */}
+        <View className="flex-1">
+            <View className="flex-1 bg-light-pink">
+                {displayItems.wallpaper.image ? (
+                    <Image 
+                        source={displayItems.wallpaper.image} 
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                        }}
+                    resizeMode="cover" />
+                ) : (
+                    <View className="flex-1 bg-light-pink"/>
+                )}
+                {isEditing && displayItems.wallpaper.image && (
+                    <Pressable 
+                        onPress={() => setSelectedItem('wallpaper')}
+                    />
+                )}
+            </View>
+            
 
         <Stack.Screen options={{ headerShown: false, contentStyle: { paddingTop: 0, marginTop: 0 }  }} />
 
-    {/* WALLPAPER */}
-    {displayItems.wallpaper.image && (
-        <DragItem
-        item={{ 
-            id: 'wallpaper', 
-            x: displayItems.wallpaper.x, 
-            y: displayItems.wallpaper.y, 
-            z: displayItems.wallpaper.z,
-            scaleX: displayItems.wallpaper.scaleX ?? 1,
-        }}
-        draggable={isEditing}
-        selected={isEditing && selectedItem === 'wallpaper'}
-        onPress={() => setSelectedItem('wallpaper')}
-        stopDrag={(id, x, y) => {
-            if (isEditing) {
-            setEditingItems(prev => ({
-                ...prev,
-                [id]: { ...prev[id], x, y }
-            }));
-            }
-        }}
-        >
-        <Image source={displayItems.wallpaper.image} style={{width: 110, height:110, zIndex: 0}} contentFit="contain" />
-        </DragItem>
-    )}
         {/* Bulletin Board */}
         <View className="absolute top-64 right-3 w-72 h-48 bg-bulletin-board border-8 border-bulletin-border z-[1]" >
             <View className='absolute inset-0'>
