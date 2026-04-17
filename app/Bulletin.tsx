@@ -1,11 +1,16 @@
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, View, Image, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Animated, PanResponder } from "react-native";
+import { Pressable, View, Image, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Animated, PanResponder, ImageSourcePropType } from "react-native";
 import EditBar from '../components/bulletin-edit-bar';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StickyNote } from '@/components/sticky-note';
 import { useNotes } from '@/components/NoteContext';
 import { DragNote } from '@/components/DragNote';
+import sticker1 from '../assets/stickers/first-entry.png';
+import sticker2 from '../assets/stickers/first-friend.png';
+import AddSticker from '@/components/add-sticker';
+import { useStickers } from '@/components/StickerContext';
+import info from '../assets/images/info.png';
 import { auth } from '@/src/firebase/config';
 import { subscribeToStickyNotes, deleteStickyNote, updateStickyNotePosition } from '@/src/firebase/stickynotes';
 
@@ -14,6 +19,18 @@ interface PositionNote {
   top: number;
   left: number;
 }
+interface StickerData {
+    id: number;
+    image: ImageSourcePropType;
+    top: number;
+    left: number;
+}
+interface StickerData {
+    id: number;
+    image: ImageSourcePropType;
+    top: number;
+    left: number;
+}
 
 export default function Bulletin() {
     const router = useRouter();
@@ -21,7 +38,12 @@ export default function Bulletin() {
     const [isVisible, setIsVisible] = React.useState(false);
     const [noteText, setNoteText] = useState('');
     const [selectedNote, setSelectedNote] = useState<string | null>(null);
+    const [stickerVisible, setStickerVisible] = useState(false);
+    const [selectedSticker, setSelectedSticker] = useState<number | null>(null);
+    //const [stickers, setStickers] = useState<StickerData[]>([]);
+    
     const { deleteNote } = useNotes();
+    const { deleteSticker, addSticker } = useStickers();
     const [notes, setNotes] = useState<any[]>([]);
 
     const currentUser = auth.currentUser;
@@ -36,7 +58,9 @@ export default function Bulletin() {
 
     const closeEditBar = () => {
         setIsVisible(false);
+        setStickerVisible(false);
         setSelectedNote(null);
+        setSelectedSticker(null);
     };
 
     const editNote = () => {
@@ -53,54 +77,33 @@ export default function Bulletin() {
             await deleteStickyNote(boardOwnerUid, selectedNote);
             setSelectedNote(null);
         }
+        if(selectedSticker) {
+            deleteSticker(selectedSticker);
+            setSelectedSticker(null);
+        }
+    }
+      const [user, setUser] = useState({ 
+        stickers: [
+            { id: 1, image: sticker1 },
+            { id: 2, image: sticker2 },
+        ],
+});
+
+    const showStickers = () => {
+        setStickerVisible(true);
+    }    
+    const handleStickers = (imgSource: any) => {
+        const newSticker: StickerData = {
+            id: Date.now(),
+            image: imgSource,
+            top: 50,
+            left: 50,
+        };
+       addSticker(newSticker);
     };
-    
-    // const pan = useRef(new Animated.ValueXY()).current;
 
-    // const panResponder = useRef(PanResponder.create({
-    //     onMoveShouldSetPanResponder: () => true,
-    //     onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}], {useNativeDriver: false}),
-    //     onPanResponderRelease: () => {
-    //         Animated.spring(
-    //             pan,
-    //             {toValue: { x: 0, y: 0}, useNativeDriver: false}
-    //         ).start();
-    //     },
-    // }),
-    // ).current;
-    //     const pan = useRef(new Animated.ValueXY()).current;
-       
-    //     const panResponder = useRef(PanResponder.create({
-    //         onStartShouldSetPanResponder: () => false,
-    //         onMoveShouldSetPanResponder: (_, gestureState) => {
-    //             return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
-    //         },
-    //         onPanResponderGrant: () => {
-    //             pan.setOffset({
-    //                 x: pan.x._value,
-    //                 y: pan.y._value,
-    //             });
-    //             pan.setValue({ x: 0, y: 0 });
-    //         },
-    //         onPanResponderMove: Animated.event(
-    //             [null, { dx: pan.x, dy: pan.y }],
-    //             {useNativeDriver: false}
-    //         ),
-    //         onPanResponderRelease: () => {
-    //             pan.flattenOffset();
-    //         },
-    //     })
-    // ).current;
-        // const translateY = useRef(new Animated.Value(0)).current;
-        // const DragNote = () => {
-        //     Animated.timing(pan, {
-        //         toValue: {x: 50, y: 50},
-        //         duration: 1000,
-        //         useNativeDriver: true,
-        //     }).start();
-        // };
+    const { stickers, handleStickerPosition } = useStickers();
     
-
     const handleNotePosition = async (
         noteId: string,
         top: number,
@@ -130,6 +133,7 @@ export default function Bulletin() {
             onPress={() => {
                 setIsVisible(true);
                 setSelectedNote(null);
+                setSelectedSticker(null);
             }}
                 className="absolute inset-0 w-full h-72 bg-bulletin-board border-[10px] border-bulletin-border overflow-visible"
             />
@@ -138,8 +142,6 @@ export default function Bulletin() {
                     const isSelected = selectedNote === note.id;
 
                     return (
-                   
-                //    <Pressable 
                     <DragNote
                         key={note.id}
                         note={note}
@@ -147,29 +149,86 @@ export default function Bulletin() {
                         onPress={() => {
                             setIsVisible(true); 
                             setSelectedNote(note.id); 
+                            setSelectedSticker(null);
                         }}
                         stopDrag={handleNotePosition}
                     >
-
                         { /* Outline selected note */ }
-                        <View className={`${isSelected ? 'border-2 border-black' : 'border-transparent'}`}>
-                        <StickyNote
-                            isEditable={false}
-                            {...note}
-                            variant="small"
-                         />
-                          </View>
-                          </DragNote>
+                        <View className={`${isSelected ? 'border-2 border-black' : 'border-transparent'} z-10`}>
+                            <StickyNote
+                                isEditable={false}
+                                key={note.id} 
+                                {...note}
+                                variant="small"
+                            />
+                        </View>
+                    </DragNote>
                     );
-                    })}
+                })}
+
+                { /* Display sticker(s) on bulletin */}
+                {stickers.map((sticker) => {
+                    const isSelected = selectedSticker === sticker.id;
+                    return (
+                        <DragNote
+                            key={sticker.id}
+                            note={sticker}
+                            isSelected={isSelected}
+                            onPress={() => {
+                                setIsVisible(true);
+                                setSelectedSticker(sticker.id);
+                                setSelectedNote(null);
+                            }}
+                            stopDrag={handleStickerPosition}
+                        >
+                        <View
+                            //key={sticker.id}
+                            style={{
+                            //position: 'absolute',
+                            top: sticker.top,
+                            left: sticker.left,
+                            zIndex: 20,
+                        }}>
+                        <View className={`${isSelected ?'border-2 border-black' : 'border-transparent'} z-10`}>
+                            <Image 
+                            source={sticker.image}
+                            style={{
+                            width: 60,
+                            height: 60,
+                            }}/>
+                            </View>
+                        </View>
+                        </DragNote>
+                    );
+                })}
                 </View>
             </View>
+
+            {!isVisible && (
+                <View style={{width: '70%', height: 50, backgroundColor:'#EEDBD3', alignSelf: 'center'}}
+                    className="absolute top-32">
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
+                        <Image source={info} style={{ width: 24, height:24, marginLeft:10}}/>
+                        <Text style={{ marginLeft:8 }}>Tap on the bulletin to edit its style.</Text>
+                    </View>
+                </View>
+            )}
+            {isVisible && (
+                <View style={{width: '80%', height: 60, backgroundColor:'#EEDBD3', alignSelf: 'center'}}
+                    className="absolute top-24">
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
+                        <Image source={info} style={{ width: 24, height:24, marginLeft:10}}/>
+                        <Text style={{ marginLeft:8 }}>Tap on a note or sticker to edit, or delete.{"\n"}Drag to move the item.</Text>
+                    </View>
+                </View>
+            )}
 
              {/* Make Edit Bar visible when bulletin is pressed */}
             {isVisible && (
                 <View className="flex-row absolute bottom-0 ml-10 w-full h-full">
-                    {!selectedNote ? (
+                    {!selectedNote && !selectedSticker ? (
                     <EditBar
+                        key={selectedSticker || selectedNote}
                         addNotePressed={() =>
                         router.navigate({
                             pathname: "/bulletin-add-note",
@@ -177,21 +236,35 @@ export default function Bulletin() {
                         })
                         }
                         donePressed={closeEditBar}
+                        stickersPressed={showStickers}
                     />
                     ) : (
                     <EditBar
+                        key={selectedSticker || selectedNote}
                         deletePressed={handleDelete}
-                        editPressed={editNote}
+                        editPressed={selectedNote ? editNote : undefined}
                         donePressed={closeEditBar}
+                        stickersPressed={showStickers}
+
                     />
                     )}
+                    {/* Handling Stickers */}
+                    {stickerVisible && (
+                        <View className="absolute ml-0 w-full h-full">
+                            <View 
+                                style={{ position: 'absolute', width: '88%', height: 100, backgroundColor:'#EEDBD3', marginBottom: 20, flexDirection:'row'}}
+                                className="ml-0 top-44 right-[60px] rounded-[10px] border-hairline border-brown">
+                        <AddSticker
+                            user={user}
+                            onAdd={handleStickers}
+                        />
+                        </View>
+                        </View>
+                    )}
                 </View>
-                )}
-          
-
-            
-        </View>
-    
+                
+            )}
+        </View>    
     </TouchableWithoutFeedback>
   );
 };

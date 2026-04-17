@@ -1,20 +1,231 @@
-import { Stack, useRouter } from 'expo-router';
-import React, { use, useEffect, useState } from 'react';
-import { Image, TouchableOpacity, View, Text } from "react-native";
-import { ImgButton, NavButton } from '../components/buttons/navButtons';
-import { Sidebar } from './Sidebar';
-import JournalModal from '../components/JournalModal';
-import { Asset } from 'expo-asset';
+import { DragNote } from '@/components/DragNote';
+import Inventory from '@/components/inventory';
+import LowerNav from '@/components/lowerNav';
+import { useNotes } from '@/components/NoteContext';
+import RedecorateBar from '@/components/redecorate-bar';
+import { useStickers } from '@/components/StickerContext';
+import { StickyNote } from '@/components/sticky-note';
 import { auth, db } from '@/src/firebase/config';
-import { getUserDocument } from '@/src/firebase/users';
+import { Asset } from 'expo-asset';
+import { Stack, useRouter } from 'expo-router';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { refreshCurrentUserStreak } from '@/src/firebase/users';
+import React, { useRef, useEffect, useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import monstera from '../assets/images/desk/Desk-monstera.png';
+import info from '../assets/images/info.png';
+import { NavButton } from '../components/buttons/navButtons';
+import { DragItem } from '../components/drag-items';
+import JournalModal from '../components/JournalModal';
+import { Sidebar } from './Sidebar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ViewShot, { captureRef } from 'react-native-view-shot';
+import TransformBar from '@/components/transform-toolbar';
 
-export default function DeskScreen() {
+const DeskScreen = ({ onSnapshotUpdate }) => {
     const router = useRouter();
     const [journalVisible, setJournalVisible] = useState(false);
     const [gems, setGems] = useState(0);
     const [currentStreak, setCurrentStreak] = useState(0);
+    const [isVisible, setIsVisible] = React.useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingItems, setEditingItems] = useState(null);
+    const [selectedItem, setSelectedItem] = useState<string | null>(null);
+    const [openInventory, setOpenInventory] = useState(false);
+
+  const [deskItems, setdeskItems] = useState({
+    plant: { image: monstera, x: 0, y: 400, z:2, scaleX: 1},
+    wallItem: {image: null, x: 150, y: 350, z:1, scaleX: 1},
+    wallpaper: {image: null, x: 150, y: 350, z:1, scaleX: 1},
+    deskItem: {}
+  });
+
+ const startEditing = () => {
+  setEditingItems({ ...deskItems });
+  setIsEditing(true);
+};
+
+//--- TRANSFORMATION TOOLBAR ACTIONS ---//
+
+const rotateItem = () => {
+    if(!selectedItem || !editingItems) return;
+
+    setEditingItems(prev => {
+
+        if(prev.deskItem?.[selectedItem]) {
+            const current = prev.deskItem[selectedItem];
+            const currentScale = current.scaleX ?? 1;
+
+            return {
+                ...prev,
+                deskItem: {
+                    ...prev.deskItem,
+                    [selectedItem]: {
+                        ...current,
+                        scaleX: current.scaleX === -1 ? 1 : -1,
+                    }
+                }
+            };
+        }
+
+        const current = prev[selectedItem];
+        const currentScale = current.scaleX ?? 1;
+        if(!current) return prev;
+
+        return {
+            ...prev,
+            [selectedItem]: {
+                ...current,
+                scaleX: currentScale === -1 ? 1 : -1,
+            },
+        };
+    });
+};
+
+// prevents onPress from resetting state when 
+// reselecting an item
+const onPress = () => {
+  if (selectedItem !== item.id) {
+    setSelectedItem(item.id);
+  }
+};
+
+// Lets the player increase the z index of selected item 
+const bringForward = () => {
+  if (!selectedItem || !editingItems) return;
+
+  const maxZ = Math.max(
+    ...Object.values(editingItems).map(item => item?.z ?? 0)
+  );
+
+  setEditingItems(prev => ({
+    ...prev,
+    [selectedItem]: {
+      ...prev[selectedItem],
+      z: maxZ + 1,
+    }
+  }));
+};
+
+// Lets the player decrease the z index of selected item 
+const pushBack = () => {
+  if (!selectedItem || !editingItems) return;
+
+  const maxZ = Math.max(
+    ...Object.values(editingItems).map(item => item?.z ?? 0)
+  );
+
+  setEditingItems(prev => ({
+    ...prev,
+    [selectedItem]: {
+      ...prev[selectedItem],
+      z: maxZ - 1,
+    }
+  }));
+};
+
+const storeItem = () => {
+    if (!selectedItem || !editingItems) return;
+
+    if (selectedItem === 'wallpaper') {
+        setSelectedItem(null);
+        return;
+    }
+
+    if (editingItems.deskItem?.[selectedItem]) {
+    setEditingItems(prev => {
+        const updatedDeskItems = { ...prev.deskItem };
+        delete updatedDeskItems[selectedItem];
+        return { ...prev, deskItem: updatedDeskItems };
+    });
+    } else {
+        setEditingItems(prev => ({
+        ...prev,
+        [selectedItem]: {
+            ...prev[selectedItem],
+            image: null,
+        }
+    }));
+    setSelectedItem(null);
+  }
+};
+
+//--- MAIN REDECORATE TOOLBAR ACTIONS ---//
+
+const handlePlaceItem = (newItem) => {
+    const type = newItem.tag;
+    
+    // items with the "desk-item" tag can have multiple items
+    // of that type added to the screen. 
+    if (type === "desk-item") {
+      const id = `desk-${Date.now()}`;
+
+    setEditingItems(prev => {
+      const maxZ = Math.max(
+        0,
+        ...Object.values(prev.deskItem || {}).map(i => i?.z ?? 0)
+      );
+
+      return {
+        ...prev,
+        deskItem: {
+          ...prev.deskItem,
+          [id]: {
+            id,
+            image: newItem.image,
+            x: 100,
+            y: 300,
+            z: maxZ + 1,
+            scaleX: 1,
+            width: newItem.width ?? 100,
+            height: newItem.height ?? 100,
+          }
+        }
+      };
+    });
+
+// if an item of that style (e.g. plant) is already placeed,
+// swap the image to change style
+  } else {
+    setEditingItems(prev => ({
+        ...prev,
+        [type]: {
+            ...prev[type], // Keep existing x, y, z
+            image: newItem.image // Swap the image
+        }
+    }));
+  }
+    setOpenInventory(false)
+};
+    
+  const cancelEditing = () => {
+    setEditingItems(deskItems);
+    setIsEditing(false);
+    setSelectedItem(null);
+  };
+
+  const viewShotRef = useRef();
+
+  const saveEditing = () => {
+    setdeskItems(editingItems);
+    setEditingItems(null);
+    setIsEditing(false);
+    setSelectedItem(null);
+
+    setTimeout(async () => {
+      try {
+        const uri = await captureRef(viewShotRef, {
+          format: 'jpg',
+          quality: 0.7,
+        });
+        await AsyncStorage.setItem('desk_snapshot', uri);
+      } catch (error) {
+        console.log("Snapshot failed", error);
+      }
+    }, 100);
+  };
+
+  const displayItems = isEditing && editingItems ? editingItems : deskItems;
 
     // load journal image into cache for smoother performance when opening journal modal
     useEffect(() => {
@@ -47,20 +258,102 @@ export default function DeskScreen() {
         return unsubscribe;
     }, []);
 
+       const closeEditBar = () => {
+        setIsVisible(false);
+    };
+  const { notes, handleNotePosition } = useNotes();
+  const { stickers, handleStickerPosition } = useStickers();
   return (
-    <Sidebar>
-    
-    <View className="flex-1 items-center justify-center bg-light-pink">
+    <ViewShot
+        ref={viewShotRef}
+        style={{ flex: 1 }}
+        options={{ format: "jpg", quality: 0.9 }}
+    >
+    <Sidebar gems={gems}>
+
+        {!isEditing}
+        
+        {/* WALLPAPER */}
+        <View className="flex-1">
+            <View className="flex-1 bg-light-pink">
+                {displayItems.wallpaper.image ? (
+                    <Image 
+                        source={displayItems.wallpaper.image} 
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                        }}
+                    resizeMode="cover" />
+                ) : (
+                    <View className="flex-1 bg-light-pink"/>
+                )}
+                {isEditing && displayItems.wallpaper.image && (
+                    <Pressable 
+                        onPress={() => setSelectedItem('wallpaper')}
+                    />
+                )}
+            </View>
+            
 
         <Stack.Screen options={{ headerShown: false, contentStyle: { paddingTop: 0, marginTop: 0 }  }} />
 
         {/* Bulletin Board */}
-        <View className="absolute top-64 right-3 w-72 h-48 bg-bulletin-board border-8 border-bulletin-border" >
-            <TouchableOpacity 
-                className="flex-1 justify-center items-center"
+        <View className="absolute top-64 right-3 w-72 h-48 bg-bulletin-board border-8 border-bulletin-border z-[1]" >
+            <View className='absolute inset-0'>
+            {notes.map((note) => {
+                return (
+                <DragNote
+                key={note.id}
+                note={note}
+                isSelected={false}
+                onPress={() => router.replace('/Bulletin')}
+                stopDrag={handleNotePosition}
+                >
+                <StickyNote
+                    isEditable={false}
+                    key={note.id}
+                    {...note}
+                    variant='mini'
+                />
+                
+                </DragNote>
+                );
+            })}
+            
+        { /* Display stickers on desk bulletin*/ }
+        {stickers.map((sticker) => {
+            return (
+                <DragNote
+                    key={sticker.id}
+                    note={sticker}
+                    isSelected={false}
+                    onPress={() => router.replace('/Bulletin')}
+                    stopDrag={handleStickerPosition}
+                >
+                    <View
+                        key={sticker.id}
+                        style={{
+                        //position: 'absolute',
+                        top: sticker.top,
+                        left: sticker.left,
+                        zIndex: 20,
+                    }}>
+                        <Image 
+                        source={sticker.image}
+                        style={{
+                        width: 32,
+                        height: 32,
+                        }}/>
+                    </View>
+                </DragNote>
+            );
+        })}            
+            </View>
+            <Pressable 
+                disabled={isEditing}
+                className="flex-1 justify-center items-center z-10"
                 onPress ={() => router.replace('./Bulletin')}>
-
-            </TouchableOpacity>
+            </Pressable>
         </View>
 
         {/* Desk */}
@@ -70,7 +363,92 @@ export default function DeskScreen() {
         {/* Underdesk */}
         <View className="absolute bottom-0 w-full h-20 bg-under-desk z-0" />
 
+    {/* WALL ITEM */}
+    {displayItems.wallItem.image && (
+        <DragItem
+        item={{ 
+            id: 'wallItem', 
+            x: displayItems.wallItem.x, 
+            y: displayItems.wallItem.y, 
+            z: displayItems.wallItem.z,
+            scaleX: displayItems.wallItem.scaleX ?? 1,
+        }}
+        draggable={isEditing}
+        selected={isEditing && selectedItem === 'wallItem'}
+        onPress={() => setSelectedItem('wallItem')}
+        stopDrag={(id, x, y) => {
+            if (isEditing) {
+            setEditingItems(prev => ({
+                ...prev,
+                [id]: { ...prev[id], x, y }
+            }));
+            }
+        }}
+        >
+        <Image source={displayItems.wallItem.image} style={{width: 110, height:110}} contentFit="contain" />
+        </DragItem>
+    )}
+        {/* PLANT */}
+        <DragItem
+        item={{ 
+            id: 'plant', 
+            x: displayItems.plant.x, 
+            y: displayItems.plant.y, 
+            z: displayItems.plant.z 
+        }}
+        draggable={isEditing}
+        selected={isEditing && selectedItem === 'plant'}
+        onPress={() => setSelectedItem('plant')}
+        stopDrag={(id, x, y) => {
+        if (isEditing) {
+            setEditingItems(prev => ({
+            ...prev,
+            [id]: {
+                ...prev[id],
+                x,
+                y
+            }
+            }));
+        }
+        }}
+        >
+            <Image 
+            source={displayItems.plant.image}
+            style={styles.plant} 
+            resizeMode="contain"
+        />
+        </DragItem> 
+
+      {/* This maps the items that can have multiple of that type placed */}
+      {displayItems.deskItem &&
+        Object.values(displayItems.deskItem).map(item => (
+          <DragItem
+            key={item.id}
+            item={item}
+            draggable={isEditing}
+            selected={selectedItem === item.id}
+            onPress={() => setSelectedItem(item.id)}
+            stopDrag={(id, x, y) => {
+              setEditingItems(prev => ({
+                ...prev,
+                deskItem: {
+                  ...prev.deskItem,
+                  [id]: {
+                    ...prev.deskItem[id],
+                    x,
+                    y,
+                  }
+                }
+              }));
+            }}
+          >
+            <Image source={item.image} style={{ width: item.width, height: item.height }} contentFit="contain"/>
+          </DragItem>
+        ))
+      }
         {/* Header */}
+        {!isEditing && (
+        <>
         <Image
         source={require('../figma-icons/header-lg.png')}
         className="absolute w-full"
@@ -105,10 +483,13 @@ export default function DeskScreen() {
                 </Text>
             </View>
             </View>
-
+            </>
+        )}
         {/* Journal on desk */}
-        <View className="absolute bottom-12">
-        <TouchableOpacity onPress={() => setJournalVisible(true)}>
+        <View className="absolute left-20 bottom-12">
+        <TouchableOpacity 
+            disabled={isEditing}
+            onPress={() => setJournalVisible(true)}>
             <Image
             source={require('../figma-icons/desk-journal.png')}
             className="w-72 h-72"
@@ -117,9 +498,10 @@ export default function DeskScreen() {
         </TouchableOpacity>
         </View>
 
-
         {/* Navigation Buttons */}
         { /* 'Profile' Button */ }
+        {!isEditing && (
+        <>
         <View className="absolute top-6 left-[85px] w-24 h-24 items-center justify-center">
             <NavButton 
             text="Profile" 
@@ -143,7 +525,7 @@ export default function DeskScreen() {
 
         
         { /* 'Shop' Button */ }
-        <View className="absolute -bottom-20 -right-24 w-full">
+        {/*<View className="absolute -bottom-20 -right-24 w-full">
             <ImgButton
             screenName="/shop" //file name that links to shop
             imgSource={require('../figma-icons/shop_btn.png')}
@@ -152,24 +534,87 @@ export default function DeskScreen() {
             imgStyle="w-64 h-64"
             resizeMode="contain"
             />
-        </View>
-
+        </View>*/}
+    
         { /* 'Redecorate' Button */ }
-        <View className="absolute bottom-44 right-[150px]">
-            <NavButton 
+        { /*<View className="absolute bottom-44 right-[150px]">
+            <Pressable
+                onPress={() => {
+                    setIsEditing(true);
+                    startEditing
+                    setIsVisible(false);
+            }}>
+            <View className={"flex items-center justify-center border-2 border-btn-border absolute bg-light-pink w-48 h-48 rounded-full z-50"}>
+                <View className={"rounded-full absolute bg-peach w-44 h-44"}/>
+                <Text className={"font-bold text-brown "}>Redecorate</Text>
+            </View>
+            </Pressable>*/}
+
+
+            {/* <NavButton 
             text="Redecorate" 
             screenName="/"      //file name for redecorating
             btnStyle="absolute bg-light-pink w-48 h-48 rounded-full z-50"
             textStyle=""
             innerCircle="absolute bg-peach w-44 h-44"
-            />
+            /> 
+        </View>*/}
+        </>
+        )}
+      {/* REDECORATE INSTRUCTIONS BOX */}
+      {isEditing && (
+        <View style={{width: '70%', height: 50, backgroundColor:'#EEDBD3', alignSelf: 'center'}}
+            className="absolute top-24">
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
+            <Image source={info} style={{ width: 24, height:24, marginLeft:10}}/>
+            <Text style={{ marginLeft:8 }}>Tap on an item to change its style.</Text>
+          </View>
         </View>
-
-    </View>
+      )}        
+        {/* INVENTORY OVERLAY */}
+        {isEditing && openInventory && (
+            <Inventory
+                setOpenInventory={setOpenInventory} 
+                onPlaceItem={handlePlaceItem} 
+                currentRoom="Desk"
+            />
+        )}
+        {/* TRANSFORM BAR OVERLAY */}
+        {isEditing && selectedItem && (
+            <TransformBar 
+                rotateItem={rotateItem}
+                bringForward={bringForward} 
+                pushBack={pushBack} 
+                storeItem={storeItem}
+                selectedItem={selectedItem} 
+            />
+        )}
+        { isEditing ? (
+            <RedecorateBar 
+                setOpenInventory={setOpenInventory} 
+                bringForward={bringForward} 
+                pushBack={pushBack} 
+                setStoreItem={storeItem}
+                saveEditing={saveEditing} 
+                cancelEditing={cancelEditing}/>
+            ) : (
+                <LowerNav startEditing={startEditing} />
+            )}
+        </View>
     <JournalModal
     visible={journalVisible}
     onClose={() => setJournalVisible(false)}
     />
     </Sidebar>
+    </ViewShot>
   );
 };
+
+const styles = StyleSheet.create({
+    plant: {
+        width: 200,
+        height: 200,
+    }
+});
+
+export default DeskScreen;

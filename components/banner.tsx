@@ -1,11 +1,11 @@
 import { ImageBackground } from 'expo-image';
 import { useNavigation } from 'expo-router';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Dimensions, Image, Pressable, Text, View } from 'react-native';
 import backArrow from '../assets/images/Arrow-left-circle.png';
 import Banner from '../assets/images/friends-header.svg';
 import Gems from './gems';
 
-export default function CustomHeader({title, showGems}) {
+export default function CustomHeader({title, showGems, showBackArrow}) {
   const navigation = useNavigation();
 
   return (
@@ -27,23 +27,32 @@ export default function CustomHeader({title, showGems}) {
         }}
       >
         {/* Back button */}
-        {navigation.canGoBack() && (
-          <Pressable
-            onPress={() => navigation.goBack()}
-            style={{
-              position: 'absolute',
-              left: 35,
-              padding: 10,
-            }}
-          >
-            <Image source={backArrow} style={{ width: 36, height: 36 }}/>
-          </Pressable>
-        )}
+        { showBackArrow && (
+          <View>
+            {navigation.canGoBack() && (
+              <Pressable
+                onPress={() => navigation.goBack()}
+                style={{
+                  position: 'absolute',
+                  left: -200,
+                  top: -20,
+                  width: Dimensions.get('window').width,
+                  padding: 10,
+                }}
+              >
+                <Image source={backArrow} style={{ width: 36, height: 36 }}/>
+              </Pressable>
+              )}
+            </View>
+          )}
 
         {/* Title */}
-        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-          {title}
-        </Text>
+        <View style={{ position:'absolute', justifyContent: 'center', marginTop: 20}}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+            {title}
+          </Text>
+        </View>
+        
 
         { showGems && (
           <View style={{ position: 'absolute', right: 0, marginRight: 30 }}>

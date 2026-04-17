@@ -99,7 +99,11 @@ export default function AddNote() {
                 </View> 
 
                 <View className="absolute -bottom-40 m-36">
-                     <NoteEditBar onSave={handleSave}/>
+                     <NoteEditBar 
+                        onSave={handleSave}
+                        text={value} 
+                        color={selectedColor}
+                        />
                 </View>
 
             </View>

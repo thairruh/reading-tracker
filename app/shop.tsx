@@ -105,7 +105,7 @@ const Shop = () => {
   return (
     <View style={styles.container}>
       
-        <CustomHeader title="Shop" showGems={true}/>
+        <CustomHeader title="Shop" showBackArrow={true} showGems={true}/>
 
         
         <View style={styles.wrapper}>
