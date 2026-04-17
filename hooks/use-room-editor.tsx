@@ -1,6 +1,7 @@
 import { doc, setDoc } from 'firebase/firestore';
 import { useEffect, useRef, useState } from "react";
-import { auth, db } from '../firebase';
+import { imageMap } from '../scripts/image-map';
+import { auth, db } from '../src/firebase';
 
 
 export const useRoomEditor = (
