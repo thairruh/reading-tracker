@@ -38,9 +38,9 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
 
   const [deskItems, setdeskItems] = useState({
     plant: { image: monstera, x: 0, y: 400, z:2, scaleX: 1},
-    deskItem: {},
     wallItem: {image: null, x: 150, y: 350, z:1, scaleX: 1},
     wallpaper: {image: null, x: 150, y: 350, z:1, scaleX: 1},
+    deskItem: {}
   });
 
  const startEditing = () => {
@@ -62,6 +62,7 @@ const rotateItem = () => {
             return {
                 ...prev,
                 deskItem: {
+                    ...prev.deskItem,
                     [selectedItem]: {
                         ...current,
                         scaleX: current.scaleX === -1 ? 1 : -1,
@@ -149,10 +150,8 @@ const storeItem = () => {
 
 //--- MAIN REDECORATE TOOLBAR ACTIONS ---//
 
-// if an item of that style (e.g. plant) is already placeed,
-// swap the image to change style
 const handlePlaceItem = (newItem) => {
-    const type = newItem.tag.toLowerCase();
+    const type = newItem.tag;
     
     // items with the "desk-item" tag can have multiple items
     // of that type added to the screen. 
@@ -172,14 +171,17 @@ const handlePlaceItem = (newItem) => {
           [id]: {
             id,
             image: newItem.image,
-            x: 0,
-            y: 400,
-            z: 1,
+            x: 100,
+            y: 300,
+            z: maxZ + 1,
             scaleX: 1,
+            width: newItem.width ?? 100,
+            height: newItem.height ?? 100,
           }
         }
       };
     });
+
 // if an item of that style (e.g. plant) is already placeed,
 // swap the image to change style
   } else {
@@ -266,8 +268,33 @@ const handlePlaceItem = (newItem) => {
 
         <Stack.Screen options={{ headerShown: false, contentStyle: { paddingTop: 0, marginTop: 0 }  }} />
 
+    {/* WALLPAPER */}
+    {displayItems.wallpaper.image && (
+        <DragItem
+        item={{ 
+            id: 'wallpaper', 
+            x: displayItems.wallpaper.x, 
+            y: displayItems.wallpaper.y, 
+            z: displayItems.wallpaper.z,
+            scaleX: displayItems.wallpaper.scaleX ?? 1,
+        }}
+        draggable={isEditing}
+        selected={isEditing && selectedItem === 'wallpaper'}
+        onPress={() => setSelectedItem('wallpaper')}
+        stopDrag={(id, x, y) => {
+            if (isEditing) {
+            setEditingItems(prev => ({
+                ...prev,
+                [id]: { ...prev[id], x, y }
+            }));
+            }
+        }}
+        >
+        <Image source={displayItems.wallpaper.image} style={{width: 110, height:110, zIndex: 0}} contentFit="contain" />
+        </DragItem>
+    )}
         {/* Bulletin Board */}
-        <View className="absolute top-64 right-3 w-72 h-48 bg-bulletin-board border-8 border-bulletin-border" >
+        <View className="absolute top-64 right-3 w-72 h-48 bg-bulletin-board border-8 border-bulletin-border z-[1]" >
             <View className='absolute inset-0'>
             {notes.map((note) => {
                 return (
@@ -354,7 +381,7 @@ const handlePlaceItem = (newItem) => {
             }
         }}
         >
-        <Image source={displayItems.wallItem.image} style={{width:100, height:100}} contentFit="contain" />
+        <Image source={displayItems.wallItem.image} style={{width: 110, height:110}} contentFit="contain" />
         </DragItem>
     )}
         {/* PLANT */}
@@ -411,7 +438,7 @@ const handlePlaceItem = (newItem) => {
               }));
             }}
           >
-            <Image source={item.image} style={{ width: 80, height: 80 }} />
+            <Image source={item.image} style={{ width: item.width, height: item.height }} contentFit="contain"/>
           </DragItem>
         ))
       }

@@ -42,7 +42,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
     zIndex: 10,
-    backgroundColor: '#FF0000',
   },
   outerCircle: {
     width: 159,
