@@ -3,7 +3,17 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import gem from '../assets/images/gem.png';
 import FavoriteButton from './favorite-btn';
 
-const ShopItem = ({ name, price, image, favorited, onToggleFavorite, onPress, tag }) => {
+type ShopItemProps = {
+  name: string;
+  price: number;
+  image: any;
+  favorited?: boolean;
+  onPress: () => void;
+  tag?: string;
+  owned?: boolean;
+};
+
+const ShopItem = ({ name, price, image, favorited = false, onPress, tag, owned = false }) => {
   
   const isWallpaper = tag?.toLowerCase() === 'wallpaper';
 
@@ -12,7 +22,7 @@ const ShopItem = ({ name, price, image, favorited, onToggleFavorite, onPress, ta
 
       <View className="items-center">
           <View style={[styles.box, isWallpaper && { padding: 0, overflow: 'hidden' }]}>
-              <FavoriteButton favorited={favorited} onPress={onToggleFavorite}/>
+              <FavoriteButton favorited={favorited} onPress={() => {}}/>
               <Image 
                 source={image} 
                 style={isWallpaper ? styles.fullImage : styles.wrapper}
@@ -28,6 +38,7 @@ const ShopItem = ({ name, price, image, favorited, onToggleFavorite, onPress, ta
                <Text>{price}</Text>
             </View>
            
+            {owned && <Text className="text-xs mt-1 text-brown">Owned</Text>}
           </View>
           
         </View>

@@ -5,16 +5,42 @@ import gemIcon from '../assets/images/Diamond-red.png';
 import { imageMap } from "../scripts/imageMap";
 import FavoriteButton from './favorite-btn';
 
-const ShopItemInfo = ({ selectedItem, onClose, onToggleFavorite, selectedImage }) => {
+type Variant = {
+  id: string;
+  image: string;
+};
+
+type SelectedItemType = {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  favorited?: boolean;
+  owned?: boolean;
+  variants?: Variant[];
+};
+
+type ShopItemInfoProps = {
+  selectedItem: SelectedItemType | null;
+  onClose: () => void;
+  selectedImage: any;
+  onBuy: () => void;
+  buying?: boolean;
+};
+
+const ShopItemInfo = ({ selectedItem, onClose, onToggleFavorite, selectedImage, onBuy, buying = false }: ShopItemInfoProps) => {
     if (!selectedItem) return null;
 console.log("Variants Data:", selectedItem.variants);
-    const hasVariants = selectedItem.variants && selectedItem.variants.length > 0;
+    const hasVariants = !!selectedItem.variants?.length;
     const [currentImage, setCurrentImage] = useState(selectedImage);
 
         // update main image to selected variant
     useEffect(() => {
         setCurrentImage(selectedImage);
     }, [selectedItem, selectedImage]);
+
+    const isOwned = !!selectedItem.owned;
+    const buttonText = isOwned ? "Owned" : buying ? "Buying..." : "Buy";
 
 
     return (
@@ -75,7 +101,7 @@ console.log("Variants Data:", selectedItem.variants);
                 </View>
                 )}
 
-                <TouchableOpacity style={styles.buyBtn}>
+                <TouchableOpacity style={[styles.buyBtn, (isOwned || buying) && styles.disabledBtn]} onPress={onBuy} disabled={isOwned || buying}>
                     <Text className="text-lg mt-1 font-bold">Buy</Text>
                 </TouchableOpacity>
             </View>

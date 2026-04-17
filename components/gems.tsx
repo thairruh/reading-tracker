@@ -1,8 +1,23 @@
-import React from 'react';
+import React, {useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import gemIcon from '../assets/images/Diamond-red.png';
+import { auth } from '@/src/firebase/config';
+import { subscribeToUser } from '@/src/firebase/users';
 
 const Gems = () => {
+  const [gems, setGems] = useState(0);
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const unsubscribe = subscribeToUser(user.uid, (data) => {
+      setGems(data.gems ?? 0);
+    });
+
+    return unsubscribe;
+  }, []);
+
   return (
     <View style={styles.container}>
         
@@ -11,7 +26,7 @@ const Gems = () => {
         </View>
 
         <View style={styles.whiteBox}>
-            <Text style={styles.text}>999</Text>
+            <Text style={styles.text}>{gems}</Text>
         </View>
         
     </View>
@@ -32,6 +47,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 10,
     borderColor: '#472A2A',
     borderWidth: 1,
+    marginRight: 10,
   },
   gemBox: {
     alignItems: 'center',

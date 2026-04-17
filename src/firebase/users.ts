@@ -1,4 +1,4 @@
-import { doc, getDoc, runTransaction, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, runTransaction, serverTimestamp, setDoc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "./config";
 import { User } from "firebase/auth";
 
@@ -87,6 +87,16 @@ export async function refreshCurrentUserStreak() {
       transaction.update(userRef, {
         currentStreak: 0,
       });
+    }
+  });
+}
+
+export function subscribeToUser(userId: string, callback: (data: any) => void) {
+  const ref = doc(db, "users", userId);
+
+  return onSnapshot(ref, (snapshot) => {
+    if (snapshot.exists()) {
+      callback(snapshot.data());
     }
   });
 }

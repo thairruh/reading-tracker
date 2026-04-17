@@ -7,38 +7,80 @@ import CustomHeader from '../components/banner';
 import Tabs from '../components/tabs';
 import { imageMap } from "../scripts/imageMap";
 import { db } from "../src/firebase/config";
+import { getShopItems, getCurrentUserInventory, purchaseItem } from '../src/firebase/shop';
+
+type ShopItemType = {
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+    category: string;
+    tag?: string;
+    favorited?: boolean;
+    variants?: { id: string; image: string }[];
+};
 
 const Shop = () => {
 
-    const [items, setItems] = useState([]);
+    const [items, setItems] = useState<ShopItemType[]>([]);
+    const [ownedItems, setOwnedItems] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
+    const [buying, setBuying] = useState(false);
     const [activeTab, setActiveTab] = useState('Desk');
-    const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedItem, setSelectedItem] = useState<ShopItemType | null>(null);
 
-    // get shop items from database
     useEffect(() => {
-        const fetchShopItems = async () => {
-            const snapshot = await getDocs(collection(db, 'shopItems'))
-            
-            const data = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-
-            setItems(data);
-            setLoading(false);
-        };
-        fetchShopItems();
+        loadShopData();
     }, []);
 
-    if (loading) return <Text>Loading shop...</Text>
+    // get shop items from database
+    const loadShopData = async () => {
+        try {
+        setLoading(true);
+
+        const [shopItems, inventory] = await Promise.all([
+            getShopItems(),
+            getCurrentUserInventory(),
+        ]);
+
+        setItems(shopItems as ShopItemType[]);
+        setOwnedItems(inventory.map((item: any) => item.itemId ?? item.id));
+        } catch (error) {
+        console.error("Failed to load shop data:", error);
+        } finally {
+        setLoading(false);
+        }
+    };
+
+    const handleBuy = async (item: ShopItemType) => {
+        try {
+        setBuying(true);
+        await purchaseItem(item.id, item.price);
+
+        const inventory = await getCurrentUserInventory();
+        setOwnedItems(inventory.map((invItem: any) => invItem.itemId ?? invItem.id));
+        } catch (error) {
+        console.error("Failed to purchase item:", error);
+        } finally {
+        setBuying(false);
+        }
+    };
 
     // Tabs Filtering
 
-    const filteredItems = items.filter(item => {
-        if (activeTab === 'Favorites') return item.favorited;
-        return item.category === activeTab;
-    });
+    const filteredItems = items.filter((item) => {
+        const matchesFavorites =
+            activeTab === "Favorites" ? item.favorited : true;
+
+        const matchesCategory =
+            activeTab === "Favorites"
+            ? true
+            : item.category?.toLowerCase() === activeTab.toLowerCase();
+
+        const isOwned = ownedItems.includes(item.id);
+
+        return matchesFavorites && matchesCategory && !isOwned;
+        });
 
 
     /*
@@ -82,11 +124,16 @@ const Shop = () => {
                     {selectedItem ? (
                         
                         <ShopItemInfo
-                            selectedItem={selectedItem}
+                            selectedItem={{
+                                ...selectedItem,
+                                owned: ownedItems.includes(selectedItem.id),
+                            }}
                             selectedImage={imageMap[selectedItem.image]}
                             onClose={() => setSelectedItem(null)}
-                            onToggleFavorite={() => toggleFavorite(selectedItem.id)}
+                            onBuy={() => handleBuy(selectedItem)}
+                            buying={buying}
                         />
+
                     ) : (
 
                     <View className="flex-row flex-wrap ml-1" >
@@ -95,8 +142,9 @@ const Shop = () => {
                                 key={item.id}
                                 {...item} 
                                 tag={item.tag}
+                                owned={ownedItems.includes(item.id)}
                                 image={imageMap[item.image]}
-                                onToggleFavorite={() => toggleFavorite(item.id)}
+                                
                                 onPress={() => setSelectedItem(item)}/>
                         ))}
  
