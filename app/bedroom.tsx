@@ -413,11 +413,12 @@ const handlePlaceItem = (newItem) => {
 
       {/* INVENTORY OVERLAY */}
       {isEditing && openInventory && (
-        <Inventory 
-          setOpenInventory={setOpenInventory} 
-          onPlaceItem={handlePlaceItem} 
-          currentRoom="Bedroom"
-        />
+        <Inventory
+        setOpenInventory={setOpenInventory}
+        onPlaceItem={handlePlaceItem}
+        currentRoom="Bedroom"
+        refreshKey={openInventory ? "open" : "closed"}
+      />
       )}
 
       {isEditing && selectedItem && (

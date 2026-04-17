@@ -153,12 +153,17 @@ const storeItem = () => {
 //--- MAIN REDECORATE TOOLBAR ACTIONS ---//
 
 const handlePlaceItem = (newItem) => {
-    const type = newItem.tag;
-    
-    // items with the "desk-item" tag can have multiple items
-    // of that type added to the screen. 
-    if (type === "desk-item") {
-      const id = `desk-${Date.now()}`;
+  const type = newItem.tag;
+
+  console.log("DESK PLACE:", newItem.id, newItem.name, type);
+
+  if (!editingItems) {
+    console.log("editingItems is null");
+    return;
+  }
+
+  if (type === "deskItem") {
+    const id = `desk-${Date.now()}`;
 
     setEditingItems(prev => {
       const maxZ = Math.max(
@@ -179,23 +184,21 @@ const handlePlaceItem = (newItem) => {
             scaleX: 1,
             width: newItem.width ?? 100,
             height: newItem.height ?? 100,
-          }
-        }
+          },
+        },
       };
     });
-
-// if an item of that style (e.g. plant) is already placeed,
-// swap the image to change style
   } else {
     setEditingItems(prev => ({
-        ...prev,
-        [type]: {
-            ...prev[type], // Keep existing x, y, z
-            image: newItem.image // Swap the image
-        }
+      ...prev,
+      [type]: {
+        ...prev[type],
+        image: newItem.image,
+      },
     }));
   }
-    setOpenInventory(false)
+
+  setOpenInventory(false);
 };
     
   const cancelEditing = () => {
@@ -294,6 +297,7 @@ const handlePlaceItem = (newItem) => {
         style={{ flex: 1 }}
         options={{ format: "jpg", quality: 0.9 }}
     >
+        
     <Sidebar gems={gems}>
 
         {!isEditing}
@@ -318,6 +322,8 @@ const handlePlaceItem = (newItem) => {
                     />
                 )}
             </View>
+
+            
             
 
         <Stack.Screen options={{ headerShown: false, contentStyle: { paddingTop: 0, marginTop: 0 }  }} />
@@ -471,6 +477,9 @@ const handlePlaceItem = (newItem) => {
           </DragItem>
         ))
       }
+
+
+      
         {/* Header */}
         {!isEditing && (
         <>
@@ -547,6 +556,7 @@ const handlePlaceItem = (newItem) => {
             innerCircle="absolute bg-light-pink w-44 h-44"
             />
         </View>
+        
 
         
         { /* 'Shop' Button */ }
@@ -599,10 +609,11 @@ const handlePlaceItem = (newItem) => {
         {/* INVENTORY OVERLAY */}
         {isEditing && openInventory && (
             <Inventory
-                setOpenInventory={setOpenInventory} 
-                onPlaceItem={handlePlaceItem} 
+                setOpenInventory={setOpenInventory}
+                onPlaceItem={handlePlaceItem}
                 currentRoom="Desk"
-            />
+                refreshKey={openInventory ? "open" : "closed"}
+                />
         )}
         {/* TRANSFORM BAR OVERLAY */}
         {isEditing && selectedItem && (
