@@ -1,11 +1,11 @@
 import Inventory from '@/components/inventory';
 import TransformBar from '@/components/transform-toolbar';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRoomEditor } from '@/hooks/use-room-editor';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import ViewShot, { captureRef } from 'react-native-view-shot';
+import ViewShot from 'react-native-view-shot';
 import bookshelf from '../assets/images/bedroom/BR-bookshelf-plain.png';
 import floor from '../assets/images/bedroom/BR-floor-wood-light.png';
 import plainBed from '../assets/images/bedroom/Br-plain-bed.png';
@@ -16,206 +16,28 @@ import LowerNav from '../components/lowerNav';
 import RedecorateBar from '../components/redecorate-bar';
 
 const Bedroom = ({ onSnapshotUpdate}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingItems, setEditingItems] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [openInventory, setOpenInventory] = useState(false);
-  
 
-  // This is for items that can only have one of its type on the screen
-  const [roomItems, setRoomItems] = useState({
-    bed: { image: plainBed, x: 0, y: 500, z:2, scaleX: 1},
-    bookshelf: {image: bookshelf, x: 150, y: 350, z:1, scaleX: 1},
-    rug: {image: null, x: 150, y: 450, z:1, scaleX: 1},
-    table: {image: null, x: 250, y: 450, z:1, scaleX: 1},
-    wallpaper: {image: null, x: 150, y: 350, z:1, scaleX: 1},
-    floor: floor,
-    wallItems: {}
-  });
-
-
- const startEditing = () => {
-  setEditingItems({ ...roomItems });
-  setIsEditing(true);
-};
-
-//--- TRANSFORMATION TOOLBAR ACTIONS ---//
-
-const rotateItem = () => {
-  if (!selectedItem || !editingItems) return;
-
-  setEditingItems(prev => {
-    
-    if (prev.wallItems?.[selectedItem]) {
-      const current = prev.wallItems[selectedItem];
-      const currentScale = current.scaleX ?? 1;
-
-      return {
-        ...prev,
-        wallItems: {
-          ...prev.wallItems,
-          [selectedItem]: {
-            ...current,
-            scaleX: current.scaleX === -1 ? 1 : -1,
-          }
-        }
-      };
-    }
-    
-    const current = prev[selectedItem];
-    const currentScale = current.scaleX ?? 1;
-    if (!current) return prev;
-
-
-    return {
-      ...prev,
-      [selectedItem]: {
-        ...current,
-        scaleX: currentScale === -1 ? 1 : -1,
-      },
-    };
-  });
-};
-
-// prevents onPress from resetting state when 
-// reselecting an item
-const onPress = () => {
-  if (selectedItem !== item.id) {
-    setSelectedItem(item.id);
-  }
-};
-
-// Lets the player increase the z index of selected item 
-const bringForward = () => {
-  if (!selectedItem || !editingItems) return;
-
-  const maxZ = Math.max(
-    ...Object.values(editingItems).map(item => item?.z ?? 0)
-  );
-
-  setEditingItems(prev => ({
-    ...prev,
-    [selectedItem]: {
-      ...prev[selectedItem],
-      z: maxZ + 1,
-    }
-  }));
-};
-
-// Lets the player decrease the z index of selected item 
-const pushBack = () => {
-  if (!selectedItem || !editingItems) return;
-
-  const maxZ = Math.max(
-    ...Object.values(editingItems).map(item => item?.z ?? 0)
-  );
-
-  setEditingItems(prev => ({
-    ...prev,
-    [selectedItem]: {
-      ...prev[selectedItem],
-      z: maxZ - 1,
-    }
-  }));
-};
-
-const storeItem = () => {
-  if (!selectedItem || !editingItems) return;
-
-  if (editingItems.wallItems?.[selectedItem]) {
-    setEditingItems(prev => {
-      const updatedWallItems = { ...prev.wallItems };
-      delete updatedWallItems[selectedItem];
-      return { ...prev, wallItems: updatedWallItems };
-    });
-    } else {
-    setEditingItems(prev => ({
-      ...prev,
-      [selectedItem]: {
-        ...prev[selectedItem],
-        image: null,
-      }
-    }));
-    setSelectedItem(null);
-  }
-};
-
-//--- MAIN REDECORATE TOOLBAR ACTIONS ---//
-
-const handlePlaceItem = (newItem) => {
-    const type = newItem.tag.toLowerCase();
-    
-    // items with the "wall-item" tag can have multiple items
-    // of that type added to the screen. wall-items can be replaced
-    // with desk-items for the desk screen
-    if (type === "wall-item") {
-      const id = `wall-${Date.now()}`;
-
-    setEditingItems(prev => {
-      const maxZ = Math.max(
-        0,
-        ...Object.values(prev.wallItems || {}).map(i => i?.z ?? 0)
-      );
-
-      return {
-        ...prev,
-        wallItems: {
-          ...prev.wallItems,
-          [id]: {
-            id,
-            image: newItem.image,
-            x: 100,
-            y: 300,
-            z: 1,
-            scaleX: 1,
-          }
-        }
-      };
-    });
-
-// if an item of that style (e.g. bed) is already placeed,
-// swap the image to change style
-  } else {
-    setEditingItems(prev => ({
-        ...prev,
-        [type]: {
-            ...prev[type], // Keep existing x, y, z
-            image: newItem.image // Swap the image
-        }
-    }));
-  }
-    setOpenInventory(false)
-};
-
-  const cancelEditing = () => {
-    setEditingItems(roomItems);
-    setIsEditing(false);
-    setSelectedItem(null);
-  };
-
-  const viewShotRef = useRef();
-
-  const saveEditing = async () => {
-    setRoomItems(editingItems);
-    setEditingItems(null);
-    setIsEditing(false);
-    setSelectedItem(null);
-    
-    setTimeout(async () => {
-      try {
-        const uri = await captureRef(viewShotRef, {
-          format: 'jpg',
-          quality: 0.7,
-        });
-        await AsyncStorage.setItem('bedroom_snapshot', uri);
-      } catch (error) {
-        console.log("Snapshot failed", error);
-      }
-    }, 100);
-  };
-
-  const displayItems = isEditing && editingItems ? editingItems : roomItems;
-
+    const {
+      isEditing, editingItems, setEditingItems,
+      selectedItem, setSelectedItem,
+      openInventory, setOpenInventory,
+      displayItems, viewShotRef,
+      startEditing, cancelEditing, saveEditing,
+      rotateItem, bringForward, pushBack,
+      storeItem, handlePlaceItem, stopDrag,
+    } = useRoomEditor(
+    {
+      bed: { image: plainBed, x: 0, y: 500, z:2, scaleX: 1},
+      bookshelf: {image: bookshelf, x: 150, y: 350, z:1, scaleX: 1},
+      rug: {image: null, x: 150, y: 450, z:1, scaleX: 1},
+      table: {image: null, x: 250, y: 450, z:1, scaleX: 1},
+      wallpaper: {image: null, x: 150, y: 350, z:1, scaleX: 1},
+      floor: floor,
+      wallItems: {}
+    },
+      'bedroom_snapshot',
+      'wallItems'
+    );
 
   return (
     // Wrap the Screen in ViewShot so that the Where to Next screen can
