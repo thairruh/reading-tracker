@@ -39,7 +39,7 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
     {
       plant: { image: monstera, x: 0, y: 400, z:2, scaleX: 1},
       wallItem: {image: null, x: 150, y: 350, z:1, scaleX: 1},
-      wallpaper: {image: null, x: 150, y: 350, z:1, scaleX: 1},
+      wallpaper: 'null',
       deskItem: {}
     },
     'Desk_snapshot',
@@ -89,9 +89,9 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
         {/* WALLPAPER */}
         <View className="flex-1">
             <View className="flex-1 bg-light-pink">
-                {displayItems.wallpaper.image ? (
+                {displayItems.wallpaper ? (
                     <Image 
-                        source={displayItems.wallpaper.image} 
+                        source={displayItems.wallpaper} 
                         style={{
                             width: "100%",
                             height: "100%",
@@ -99,11 +99,6 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
                     resizeMode="cover" />
                 ) : (
                     <View className="flex-1 bg-light-pink"/>
-                )}
-                {isEditing && displayItems.wallpaper.image && (
-                    <Pressable 
-                        onPress={() => setSelectedItem('wallpaper')}
-                    />
                 )}
             </View>
             

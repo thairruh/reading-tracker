@@ -24,11 +24,14 @@ export const useRoomEditor = (
   // convert images to string keys
   const serialized = JSON.parse(JSON.stringify(items, (key, value) => {
     if (key === 'image') {
-      return Object.keys(imageMap).find(k => imageMap[k] === value);
+      const found = Object.keys(imageMap).find(k => imageMap[k] === value);
+      console.log('serializing image:', found, 'from value:', value); // ✅ add this
+      return found;
     }
     return value;
   }));
 
+  console.log('saving to DB:', JSON.stringify(serialized, null, 2));
   await setDoc(
     doc(db, "users", user.uid, "rooms", roomType),
     serialized
@@ -189,6 +192,14 @@ const pushBack = () => {
     const tag = newItem.tag.toLowerCase();
     // If tag matches multi-item key (e.g. "desk-item" or "wall-item"), add a new instance
     const isMulti = tag === 'wall-item' || tag === 'desk-item';
+
+    if (newItem.tag === "wallpaper") {
+    setEditingItems(prev => ({
+      ...prev,
+      wallpaper: newItem.image
+    }));
+    return;
+  }
 
     if (isMulti) {
       const id = `${tag}-${Date.now()}`;
