@@ -5,22 +5,22 @@ import { useNotes } from '@/components/NoteContext';
 import RedecorateBar from '@/components/redecorate-bar';
 import { useStickers } from '@/components/StickerContext';
 import { StickyNote } from '@/components/sticky-note';
+import TransformBar from '@/components/transform-toolbar';
+import { useRoomEditor } from '@/hooks/use-room-editor';
 import { auth, db } from '@/src/firebase/config';
 import { Asset } from 'expo-asset';
 import { Stack, useRouter } from 'expo-router';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { refreshCurrentUserStreak } from '@/src/firebase/users';
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import ViewShot from 'react-native-view-shot';
 import monstera from '../assets/images/desk/Desk-monstera.png';
 import info from '../assets/images/info.png';
 import { NavButton } from '../components/buttons/navButtons';
 import { DragItem } from '../components/drag-items';
 import JournalModal from '../components/JournalModal';
 import { Sidebar } from './Sidebar';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import ViewShot, { captureRef } from 'react-native-view-shot';
-import TransformBar from '@/components/transform-toolbar';
 
 const DeskScreen = ({ onSnapshotUpdate }) => {
     const router = useRouter();
@@ -28,232 +28,26 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
     const [gems, setGems] = useState(0);
     const [currentStreak, setCurrentStreak] = useState(0);
     const [isVisible, setIsVisible] = React.useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editingItems, setEditingItems] = useState(null);
-    const [selectedItem, setSelectedItem] = useState<string | null>(null);
-    const [openInventory, setOpenInventory] = useState(false);
 
-  const [deskItems, setdeskItems] = useState({
-    plant: { image: monstera, x: 0, y: 400, z:2, scaleX: 1},
-    wallItem: {image: null, x: 150, y: 350, z:1, scaleX: 1},
-    wallpaper: {image: null, x: 150, y: 350, z:1, scaleX: 1},
-    deskItem: {}
-  });
-
- const startEditing = () => {
-  setEditingItems({ ...deskItems });
-  setIsEditing(true);
-};
-
-//--- TRANSFORMATION TOOLBAR ACTIONS ---//
-
-const rotateItem = () => {
-    if(!selectedItem || !editingItems) return;
-
-    setEditingItems(prev => {
-
-        if(prev.deskItem?.[selectedItem]) {
-            const current = prev.deskItem[selectedItem];
-            const currentScale = current.scaleX ?? 1;
-
-            return {
-                ...prev,
-                deskItem: {
-                    ...prev.deskItem,
-                    [selectedItem]: {
-                        ...current,
-                        scaleX: current.scaleX === -1 ? 1 : -1,
-                    }
-                }
-            };
-        }
-
-        const current = prev[selectedItem];
-        const currentScale = current.scaleX ?? 1;
-        if(!current) return prev;
-
-        return {
-            ...prev,
-            [selectedItem]: {
-                ...current,
-                scaleX: currentScale === -1 ? 1 : -1,
-            },
-        };
-    });
-};
-
-// prevents onPress from resetting state when 
-// reselecting an item
-const onPress = () => {
-  if (selectedItem !== item.id) {
-    setSelectedItem(item.id);
-  }
-};
-
-// Lets the player increase the z index of selected item 
-const bringForward = () => {
-  if (!selectedItem || !editingItems) return;
-
-  const maxZ = Math.max(
-    ...Object.values(editingItems).map(item => item?.z ?? 0)
+    const {
+      isEditing, editingItems, setEditingItems,
+      selectedItem, setSelectedItem,
+      openInventory, setOpenInventory,
+      roomItems, viewShotRef, displayItems,
+      startEditing, cancelEditing, saveEditing,
+      rotateItem, bringForward, pushBack,
+      storeItem, handlePlaceItem, stopDrag,
+    } = useRoomEditor(
+    {
+      plant: { image: monstera, x: 0, y: 400, z:2, scaleX: 1},
+      wallItem: {image: null, x: 150, y: 350, z:1, scaleX: 1},
+      wallpaper: 'null',
+      deskItem: {}
+    },
+    'desk_snapshot',
+    'deskItem',
+    'desk'
   );
-
-  setEditingItems(prev => ({
-    ...prev,
-    [selectedItem]: {
-      ...prev[selectedItem],
-      z: maxZ + 1,
-    }
-  }));
-};
-
-// Lets the player decrease the z index of selected item 
-const pushBack = () => {
-  if (!selectedItem || !editingItems) return;
-
-  const maxZ = Math.max(
-    ...Object.values(editingItems).map(item => item?.z ?? 0)
-  );
-
-  setEditingItems(prev => ({
-    ...prev,
-    [selectedItem]: {
-      ...prev[selectedItem],
-      z: maxZ - 1,
-    }
-  }));
-};
-
-const storeItem = () => {
-    if (!selectedItem || !editingItems) return;
-
-    if (selectedItem === 'wallpaper') {
-        setSelectedItem(null);
-        return;
-    }
-
-    if (editingItems.deskItem?.[selectedItem]) {
-    setEditingItems(prev => {
-        const updatedDeskItems = { ...prev.deskItem };
-        delete updatedDeskItems[selectedItem];
-        return { ...prev, deskItem: updatedDeskItems };
-    });
-    } else {
-        setEditingItems(prev => ({
-        ...prev,
-        [selectedItem]: {
-            ...prev[selectedItem],
-            image: null,
-        }
-    }));
-    setSelectedItem(null);
-  }
-};
-
-//--- MAIN REDECORATE TOOLBAR ACTIONS ---//
-
-const handlePlaceItem = (newItem) => {
-  const type = newItem.tag;
-
-  console.log("DESK PLACE:", newItem.id, newItem.name, type);
-
-  if (!editingItems) {
-    console.log("editingItems is null");
-    return;
-  }
-
-  if (type === "deskItem") {
-    const id = `desk-${Date.now()}`;
-
-    setEditingItems(prev => {
-      const maxZ = Math.max(
-        0,
-        ...Object.values(prev.deskItem || {}).map(i => i?.z ?? 0)
-      );
-
-      return {
-        ...prev,
-        deskItem: {
-          ...prev.deskItem,
-          [id]: {
-            id,
-            image: newItem.image,
-            x: 100,
-            y: 300,
-            z: maxZ + 1,
-            scaleX: 1,
-            width: newItem.width ?? 100,
-            height: newItem.height ?? 100,
-          },
-        },
-      };
-    });
-  } else {
-    setEditingItems(prev => ({
-      ...prev,
-      [type]: {
-        ...prev[type],
-        image: newItem.image,
-      },
-    }));
-  }
-
-  setOpenInventory(false);
-};
-    
-  const cancelEditing = () => {
-    setEditingItems(deskItems);
-    setIsEditing(false);
-    setSelectedItem(null);
-  };
-
-  const viewShotRef = useRef();
-
-  const saveEditing = async () => {
-    if (!editingItems) return;
-
-    // update UI
-    setdeskItems(editingItems);
-    setEditingItems(null);
-    setIsEditing(false);
-    setSelectedItem(null);
-
-    // save actual layout
-    try {
-        await AsyncStorage.setItem('desk_items', JSON.stringify(editingItems));
-    } catch (error) {
-        console.log('Failed to save desk items', error);
-    }
-
-    setTimeout(async () => {
-        try {
-        const uri = await captureRef(viewShotRef, {
-            format: 'jpg',
-            quality: 0.7,
-        });
-        await AsyncStorage.setItem('desk_snapshot', uri);
-        } catch (error) {
-        console.log("Snapshot failed", error);
-        }
-    }, 100);
-    };
-
-  const displayItems = isEditing && editingItems ? editingItems : deskItems;
-
-    useEffect(() => {
-        const loadDeskItems = async () => {
-            try {
-            const saved = await AsyncStorage.getItem('desk_items');
-            if (saved) {
-                setdeskItems(JSON.parse(saved));
-            }
-            } catch (error) {
-            console.log('Failed to load desk items', error);
-            }
-        };
-
-        loadDeskItems();
-    }, []);
 
     // load journal image into cache for smoother performance when opening journal modal
     useEffect(() => {
@@ -305,9 +99,9 @@ const handlePlaceItem = (newItem) => {
         {/* WALLPAPER */}
         <View className="flex-1">
             <View className="flex-1 bg-light-pink">
-                {displayItems.wallpaper.image ? (
+                {displayItems.wallpaper ? (
                     <Image 
-                        source={displayItems.wallpaper.image} 
+                        source={displayItems.wallpaper} 
                         style={{
                             width: "100%",
                             height: "100%",
@@ -315,11 +109,6 @@ const handlePlaceItem = (newItem) => {
                     resizeMode="cover" />
                 ) : (
                     <View className="flex-1 bg-light-pink"/>
-                )}
-                {isEditing && displayItems.wallpaper.image && (
-                    <Pressable 
-                        onPress={() => setSelectedItem('wallpaper')}
-                    />
                 )}
             </View>
 
@@ -425,7 +214,8 @@ const handlePlaceItem = (newItem) => {
             id: 'plant', 
             x: displayItems.plant.x, 
             y: displayItems.plant.y, 
-            z: displayItems.plant.z 
+            z: displayItems.plant.z ,
+            scaleX: displayItems.plant.scaleX ?? 1,
         }}
         draggable={isEditing}
         selected={isEditing && selectedItem === 'plant'}
@@ -641,8 +431,9 @@ const handlePlaceItem = (newItem) => {
     visible={journalVisible}
     onClose={() => setJournalVisible(false)}
     />
-    </Sidebar>
     </ViewShot>
+    </Sidebar>
+    
   );
 };
 

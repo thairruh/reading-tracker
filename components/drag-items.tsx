@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, PanResponder, Pressable } from 'react-native';
 
 type DragItemProps = {
-  item: { id: string; x: number; y: number; z?: number };
+  item: { id: string; x: number; y: number; z?: number; scaleX?: number };
   draggable: boolean;
   selected?: boolean;
   onPress?: () => void;
@@ -73,7 +73,7 @@ export const DragItem = ({
       style={[
       {
         position: 'absolute',
-        transform: [{ translateX: pan.x }, { translateY: pan.y }],
+        transform: [{ translateX: pan.x }, { translateY: pan.y }, { scaleX: item.scaleX ?? 1 }],
         zIndex: item.z ?? 0,
       },
       selected && {

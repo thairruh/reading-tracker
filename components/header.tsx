@@ -10,7 +10,7 @@ export default function CustomHeader() {
   const navigation = useNavigation();
 
   return (
-    <View>
+    <View style={{ zIndex: 10 }}>
       
       <ImageBackground source={Banner} style={{width: '100%', height:155 }} className="object-contain" />
 

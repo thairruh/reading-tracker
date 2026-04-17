@@ -1,11 +1,11 @@
 import Inventory from '@/components/inventory';
 import TransformBar from '@/components/transform-toolbar';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRoomEditor } from '@/hooks/use-room-editor';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import React, { useRef, useState, useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import ViewShot, { captureRef } from 'react-native-view-shot';
+import ViewShot from 'react-native-view-shot';
 import bookshelf from '../assets/images/bedroom/BR-bookshelf-plain.png';
 import floor from '../assets/images/bedroom/BR-floor-wood-light.png';
 import plainBed from '../assets/images/bedroom/Br-plain-bed.png';
@@ -16,232 +16,31 @@ import LowerNav from '../components/lowerNav';
 import RedecorateBar from '../components/redecorate-bar';
 
 const Bedroom = ({ onSnapshotUpdate}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingItems, setEditingItems] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [openInventory, setOpenInventory] = useState(false);
-  
 
-  // This is for items that can only have one of its type on the screen
-  const [roomItems, setRoomItems] = useState({
-    bed: { image: plainBed, x: 0, y: 500, z:2, scaleX: 1},
-    bookshelf: {image: bookshelf, x: 150, y: 350, z:1, scaleX: 1},
-    rug: {image: null, x: 150, y: 450, z:1, scaleX: 1},
-    table: {image: null, x: 250, y: 450, z:1, scaleX: 1},
-    wallpaper: {image: null, x: 150, y: 350, z:1, scaleX: 1},
-    floor: floor,
-    wallItems: {}
-  });
+    const {
+      isEditing, editingItems, setEditingItems,
+      selectedItem, setSelectedItem,
+      openInventory, setOpenInventory,
+      displayItems, viewShotRef,
+      startEditing, cancelEditing, saveEditing,
+      rotateItem, bringForward, pushBack,
+      storeItem, handlePlaceItem, stopDrag,
+    } = useRoomEditor(
+    {
+      bed: { image: plainBed, x: 0, y: 500, z:2, scaleX: 1},
+      bookshelf: {image: bookshelf, x: 150, y: 350, z:1, scaleX: 1},
+      rug: {image: null, x: 150, y: 450, z:1, scaleX: 1},
+      table: {image: null, x: 250, y: 450, z:1, scaleX: 1},
+      wallpaper: 'null',
+      floor: floor,
+      wallItems: {}
+    },
+      'bedroom_snapshot',
+      'wallItems',
+      'bedroom'
+    );
 
-  useEffect(() => {
-    const loadBedroomItems = async () => {
-      try {
-        const saved = await AsyncStorage.getItem('bedroom_items');
-        if (saved) {
-          setRoomItems(JSON.parse(saved));
-        }
-      } catch (error) {
-        console.log('Failed to load bedroom items', error);
-      }
-    };
-
-    loadBedroomItems();
-  }, []);
-
-  
-
-
- const startEditing = () => {
-  setEditingItems({ ...roomItems });
-  setIsEditing(true);
-};
-
-//--- TRANSFORMATION TOOLBAR ACTIONS ---//
-
-const rotateItem = () => {
-  if (!selectedItem || !editingItems) return;
-
-  setEditingItems(prev => {
     
-    if (prev.wallItems?.[selectedItem]) {
-      const current = prev.wallItems[selectedItem];
-      const currentScale = current.scaleX ?? 1;
-
-      return {
-        ...prev,
-        wallItems: {
-          ...prev.wallItems,
-          [selectedItem]: {
-            ...current,
-            scaleX: current.scaleX === -1 ? 1 : -1,
-          }
-        }
-      };
-    }
-    
-    const current = prev[selectedItem];
-    const currentScale = current.scaleX ?? 1;
-    if (!current) return prev;
-
-
-    return {
-      ...prev,
-      [selectedItem]: {
-        ...current,
-        scaleX: currentScale === -1 ? 1 : -1,
-      },
-    };
-  });
-};
-
-// prevents onPress from resetting state when 
-// reselecting an item
-const onPress = () => {
-  if (selectedItem !== item.id) {
-    setSelectedItem(item.id);
-  }
-};
-
-// Lets the player increase the z index of selected item 
-const bringForward = () => {
-  if (!selectedItem || !editingItems) return;
-
-  const maxZ = Math.max(
-    ...Object.values(editingItems).map(item => item?.z ?? 0)
-  );
-
-  setEditingItems(prev => ({
-    ...prev,
-    [selectedItem]: {
-      ...prev[selectedItem],
-      z: maxZ + 1,
-    }
-  }));
-};
-
-// Lets the player decrease the z index of selected item 
-const pushBack = () => {
-  if (!selectedItem || !editingItems) return;
-
-  const maxZ = Math.max(
-    ...Object.values(editingItems).map(item => item?.z ?? 0)
-  );
-
-  setEditingItems(prev => ({
-    ...prev,
-    [selectedItem]: {
-      ...prev[selectedItem],
-      z: maxZ - 1,
-    }
-  }));
-};
-
-const storeItem = () => {
-  if (!selectedItem || !editingItems) return;
-
-  if (editingItems.wallItems?.[selectedItem]) {
-    setEditingItems(prev => {
-      const updatedWallItems = { ...prev.wallItems };
-      delete updatedWallItems[selectedItem];
-      return { ...prev, wallItems: updatedWallItems };
-    });
-    } else {
-    setEditingItems(prev => ({
-      ...prev,
-      [selectedItem]: {
-        ...prev[selectedItem],
-        image: null,
-      }
-    }));
-    setSelectedItem(null);
-  }
-};
-
-//--- MAIN REDECORATE TOOLBAR ACTIONS ---//
-
-const handlePlaceItem = (newItem) => {
-  const type = newItem.tag.toLowerCase();
-
-  if (type === "wall-item") {
-    const id = `wall-${Date.now()}`;
-
-    setEditingItems(prev => {
-      const maxZ = Math.max(
-        0,
-        ...Object.values(prev.wallItems || {}).map(i => i?.z ?? 0)
-      );
-
-      return {
-        ...prev,
-        wallItems: {
-          ...prev.wallItems,
-          [id]: {
-            id,
-            image: newItem.image,
-            x: 100,
-            y: 300,
-            z: 1,
-            scaleX: 1,
-          }
-        }
-      };
-    });
-  } else if (type === "floor") {
-    setEditingItems(prev => ({
-      ...prev,
-      floor: newItem.image,
-    }));
-  } else {
-    setEditingItems(prev => ({
-      ...prev,
-      [type]: {
-        ...prev[type],
-        image: newItem.image,
-      }
-    }));
-  }
-
-  setOpenInventory(false);
-};
-
-  const cancelEditing = () => {
-    setEditingItems(roomItems);
-    setIsEditing(false);
-    setSelectedItem(null);
-  };
-
-  const viewShotRef = useRef();
-
-  const saveEditing = async () => {
-    if (!editingItems) return;
-
-    setRoomItems(editingItems);
-    setEditingItems(null);
-    setIsEditing(false);
-    setSelectedItem(null);
-
-    try {
-      await AsyncStorage.setItem('bedroom_items', JSON.stringify(editingItems));
-    } catch (error) {
-      console.log('Failed to save bedroom items', error);
-    }
-
-    setTimeout(async () => {
-      try {
-        const uri = await captureRef(viewShotRef, {
-          format: 'jpg',
-          quality: 0.7,
-        });
-        await AsyncStorage.setItem('bedroom_snapshot', uri);
-      } catch (error) {
-        console.log('Bedroom snapshot failed', error);
-      }
-    }, 100);
-  };
-
-  const displayItems = isEditing && editingItems ? editingItems : roomItems;
-
-
   return (
     // Wrap the Screen in ViewShot so that the Where to Next screen can
     //capture images of the players actual bedroom whenever they redecorate it
@@ -263,11 +62,27 @@ const handlePlaceItem = (newItem) => {
             </View>
           </View>
         )}
+
+
+        {/* WALLPAPER / DEFAULT WALL */}
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          {displayItems.wallpaper === null ? (
+            <Image
+              source={displayItems.wallpaper}
+             style={{
+                  width: "100%",
+                  height: "100%",
+                }}
+              contentFit="cover"
+            />
+          ) : (
+            <View style={styles.wall}>
+              <View style={styles.wallOverlay} />
+            </View>
+          )}
+        </View>
       
-      {/* This makes the left wall darker, so it appears 3D*/}
-      <View style={styles.wall}>
-          <View style={styles.wallOverlay} />
-      </View>
+      
 
       {/* FLOOR */}
       <Pressable disabled={!isEditing} pointerEvents="box-none">
@@ -454,13 +269,8 @@ const styles = StyleSheet.create({
     flex:1
   },
   wall: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: '#d0d6c6',
-    zIndex: -1,
   },
   wallOverlay: {
     width: 205,
