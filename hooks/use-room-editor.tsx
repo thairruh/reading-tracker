@@ -1,13 +1,14 @@
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useEffect, useRef, useState } from "react";
 import { imageMap } from '../scripts/image-map';
-import { auth, db } from '../src/firebase';
+import { auth, db } from "../src/firebase/config";
 
 
 export const useRoomEditor = (
   initialRoomItems = { wallItems: {} },
   storageKey = 'room_snapshot',
-  multiItemKey = 'wallItems'  // 'wallItems' for bedroom, 'deskItem' for desk
+  multiItemKey = 'wallItems',  // 'wallItems' for bedroom, 'deskItem' for desk
+  roomType = 'desk'
 ) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingItems, setEditingItems] = useState(null);
@@ -32,6 +33,9 @@ export const useRoomEditor = (
     doc(db, "users", user.uid, "rooms", roomType),
     serialized
   );
+};
+
+
 
   const loadFromDB = async (roomType) => {
     const user = auth.currentUser;
@@ -55,6 +59,8 @@ export const useRoomEditor = (
     return parsed;
   };
 
+
+
   useEffect(() => {
     const init = async () => {
       const saved = await loadFromDB(roomType);
@@ -64,6 +70,8 @@ export const useRoomEditor = (
     };
     init();
   }, []);
+
+
 
   const startEditing = () => {
     setEditingItems({ ...roomItems });
@@ -237,5 +245,4 @@ const pushBack = () => {
     rotateItem, bringForward, pushBack,
     storeItem, handlePlaceItem, stopDrag,
   };
-};
 };

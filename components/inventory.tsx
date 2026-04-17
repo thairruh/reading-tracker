@@ -9,7 +9,7 @@ import miniPC from '../assets/images/desk/Blue-desk-mini-comp.png';
 import flowerLamp from '../assets/images/desk/Desk-flower-lamp.png';
 
 import aglaonema from '../assets/images/desk/desk-plant-aglaonema.png';
-import peacelily from '../assets/images/desk/desk-plant-peacelily .png';
+import peacelily from '../assets/images/desk/desk-plant-peacelily.png';
 import wallphotos from '../assets/images/desk/Desk-wall-photos.png';
 import wallpaper1 from '../assets/images/desk/Desk-wallpaper-1.png';
 import x from '../assets/images/x.png';

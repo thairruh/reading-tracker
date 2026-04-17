@@ -43,7 +43,8 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
       deskItem: {}
     },
     'Desk_snapshot',
-    'deskItem'
+    'deskItem',
+    'desk'
   );
 
     // load journal image into cache for smoother performance when opening journal modal

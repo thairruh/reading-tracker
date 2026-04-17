@@ -36,7 +36,8 @@ const Bedroom = ({ onSnapshotUpdate}) => {
       wallItems: {}
     },
       'bedroom_snapshot',
-      'wallItems'
+      'wallItems',
+      'bedroom'
     );
 
   return (
