@@ -48,6 +48,8 @@ const Bedroom = ({ onSnapshotUpdate}) => {
     loadBedroomItems();
   }, []);
 
+  
+
 
  const startEditing = () => {
   setEditingItems({ ...roomItems });
@@ -158,13 +160,10 @@ const storeItem = () => {
 //--- MAIN REDECORATE TOOLBAR ACTIONS ---//
 
 const handlePlaceItem = (newItem) => {
-    const type = newItem.tag.toLowerCase();
-    
-    // items with the "wall-item" tag can have multiple items
-    // of that type added to the screen. wall-items can be replaced
-    // with desk-items for the desk screen
-    if (type === "wall-item") {
-      const id = `wall-${Date.now()}`;
+  const type = newItem.tag.toLowerCase();
+
+  if (type === "wall-item") {
+    const id = `wall-${Date.now()}`;
 
     setEditingItems(prev => {
       const maxZ = Math.max(
@@ -187,19 +186,22 @@ const handlePlaceItem = (newItem) => {
         }
       };
     });
-
-// if an item of that style (e.g. bed) is already placeed,
-// swap the image to change style
+  } else if (type === "floor") {
+    setEditingItems(prev => ({
+      ...prev,
+      floor: newItem.image,
+    }));
   } else {
     setEditingItems(prev => ({
-        ...prev,
-        [type]: {
-            ...prev[type], // Keep existing x, y, z
-            image: newItem.image // Swap the image
-        }
+      ...prev,
+      [type]: {
+        ...prev[type],
+        image: newItem.image,
+      }
     }));
   }
-    setOpenInventory(false)
+
+  setOpenInventory(false);
 };
 
   const cancelEditing = () => {
