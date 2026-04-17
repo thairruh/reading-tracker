@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useEffect, useRef, useState } from "react";
 import { imageMap } from '../scripts/image-map';
@@ -93,14 +94,15 @@ export const useRoomEditor = (
     setIsEditing(false);
     setSelectedItem(null);
     await saveToDB(roomType, editingItems);
+    
     setTimeout(async () => {
       try {
-        const uri = await captureRef(viewShotRef, { format: 'jpg', quality: 0.7 });
+        const uri = await viewShotRef.current.capture();
         await AsyncStorage.setItem(storageKey, uri);
       } catch (e) {
         console.log('Snapshot failed', e);
       }
-    }, 100);
+    }, 300);
   };
 
   const rotateItem = () => {

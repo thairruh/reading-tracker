@@ -42,7 +42,7 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
       wallpaper: 'null',
       deskItem: {}
     },
-    'Desk_snapshot',
+    'desk_snapshot',
     'deskItem',
     'desk'
   );
@@ -77,14 +77,11 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
   const { notes, handleNotePosition } = useNotes();
   const { stickers, handleStickerPosition } = useStickers();
   return (
-    <ViewShot
-        ref={viewShotRef}
-        style={{ flex: 1 }}
-        options={{ format: "jpg", quality: 0.9 }}
-    >
     <Sidebar gems={gems}>
-
-        {!isEditing}
+        <ViewShot
+            ref={viewShotRef}
+            style={{ flex: 1 }}
+            options={{ format: "jpg", quality: 0.9 }}>
         
         {/* WALLPAPER */}
         <View className="flex-1">
@@ -411,8 +408,9 @@ const DeskScreen = ({ onSnapshotUpdate }) => {
     visible={journalVisible}
     onClose={() => setJournalVisible(false)}
     />
-    </Sidebar>
     </ViewShot>
+    </Sidebar>
+    
   );
 };
 
