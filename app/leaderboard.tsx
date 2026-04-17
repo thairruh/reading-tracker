@@ -110,19 +110,19 @@ export default function LeaderboardScreen() {
   const [tab, setTab] = useState<"Today" | "This Week" | "Streaks">("Today");
 
   const top3: LeaderEntry[] = [
-    { name: "3underscore3", pts: 213, rank: 1 },
-    { name: "3underscore3", pts: 156, rank: 2 },
-    { name: "3underscore3", pts: 102, rank: 3 },
+    { name: "Team6", pts: 213, rank: 1 },
+    { name: "ILikeDucks", pts: 156, rank: 2 },
+    { name: "Bella", pts: 102, rank: 3 },
   ];
 
   const rest: LeaderEntry[] = [
-    { name: "Username", pts: 100, rank: 4 },
-    { name: "Username", pts: 87,  rank: 5 },
-    { name: "Username", pts: 67,  rank: 6 },
-    { name: "Username", pts: 48,  rank: 7 },
-    { name: "Username", pts: 31,  rank: 8 },
-    { name: "Username", pts: 22,  rank: 9 },
-    { name: "Username", pts: 18,  rank: 10 },
+    { name: "Kim Dokja", pts: 100, rank: 4 },
+    { name: "justaguy", pts: 87,  rank: 5 },
+    { name: "pageturner67", pts: 67,  rank: 6 },
+    { name: "joyyyy", pts: 48,  rank: 7 },
+    { name: "Samantha", pts: 31,  rank: 8 },
+    { name: "meow", pts: 22,  rank: 9 },
+    { name: "unknown_user", pts: 18,  rank: 10 },
   ];
 
   const podiumOrder = [top3[1], top3[0], top3[2]];
