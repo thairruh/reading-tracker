@@ -49,11 +49,11 @@ export default function Bulletin() {
         }   
     }
     const handleDelete = () => {
-        if(selectedNote) {
+        if(selectedNote !== null) {
             deleteNote(selectedNote);
             setSelectedNote(null);
         }
-        if(selectedSticker) {
+        if(selectedSticker !== null) {
             deleteSticker(selectedSticker);
             setSelectedSticker(null);
         }
@@ -166,7 +166,7 @@ export default function Bulletin() {
                             //position: 'absolute',
                             top: sticker.top,
                             left: sticker.left,
-                            zIndex: 20,
+                            //zIndex: 20,
                         }}>
                         <View className={`${isSelected ?'border-2 border-black' : 'border-transparent'} z-10`}>
                             <Image 
@@ -189,7 +189,7 @@ export default function Bulletin() {
                     <EditBar  key={selectedSticker || selectedNote} donePressed={closeEditBar} stickersPressed={showStickers}/>
 
                     {/* Allow these actions if a note is selected while edit bar is visible */}
-                    {selectedNote && (
+                    { (selectedNote || selectedSticker) && (
                         <EditBar 
                             deletePressed={handleDelete}
                             editPressed={editNote} 
@@ -210,13 +210,8 @@ export default function Bulletin() {
                         </View>
                     )}
                 </View>
-                    
             )}
-          
-
-            
         </View>
-    
     </TouchableWithoutFeedback>
   );
 };

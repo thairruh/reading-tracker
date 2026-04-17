@@ -11,7 +11,7 @@ type DragNoteProps = {
 
 export const DragNote = ({ note, isSelected, onPress, stopDrag, children }: DragNoteProps) => {
 
-    const pan = useRef(new Animated.ValueXY({ x: note.left ?? 50, y: note.top ?? 50 })).current;
+    const pan = useRef(new Animated.ValueXY({ x: note.x ?? 50, y: note.y ?? 50 })).current;
     const stopDragRef = useRef(stopDrag);
 
     useEffect(() => {
@@ -51,8 +51,8 @@ export const DragNote = ({ note, isSelected, onPress, stopDrag, children }: Drag
         <Animated.View
             style={{
             position: 'absolute',
-            top: note.top,
-            left: note.left,
+            // top: note.top,
+            // left: note.left,
             zIndex: isSelected ? 10 : 1, //move selected note to the front
             transform: [{ translateX: pan.x}, { translateY: pan.y } ],
             }}
