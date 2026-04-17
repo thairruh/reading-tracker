@@ -190,6 +190,7 @@ const pushBack = () => {
 
   const handlePlaceItem = (newItem) => {
     const tag = newItem.tag.toLowerCase();
+    
     // If tag matches multi-item key (e.g. "desk-item" or "wall-item"), add a new instance
     const isMulti = tag === 'wall-item' || tag === 'desk-item';
 

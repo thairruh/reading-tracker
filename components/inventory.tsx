@@ -32,10 +32,14 @@ const Inventory = ({ setOpenInventory, onPlaceItem, currentRoom }) => {
         { id: 'aglaonema', name: "Aglaonema", image: aglaonema, category: "Desk", tag:'plant', favorited: true },
         { id: 'peacelily', name: "Peacelily", image: peacelily, category: "Desk", tag:'plant', favorited: false },
         { id: 'wall-photos', name: "Wall photos", image: wallphotos, category: "Desk", tag:'wallItem', favorited: true },
-        { id: 'wallpaper-1', name: "Wall paper 1", image: wallpaper1, category: "Desk", tag:'wallpaper', favorited: false },
+        { id: 'wallpaper-1', name: "Wall paper 1", image: wallpaper1, category: ["Desk", "Bedroom"], tag:'wallpaper', favorited: false },
     ];
 
-    const filteredItems = items.filter(item => item.category === activeTab);
+    const filteredItems = items.filter(item => 
+      Array.isArray(item.category)
+        ? item.category.includes(activeTab)
+        : item.category === activeTab
+    );
 
   return (
     <View style={styles.container}>

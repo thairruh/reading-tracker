@@ -31,7 +31,7 @@ const Bedroom = ({ onSnapshotUpdate}) => {
       bookshelf: {image: bookshelf, x: 150, y: 350, z:1, scaleX: 1},
       rug: {image: null, x: 150, y: 450, z:1, scaleX: 1},
       table: {image: null, x: 250, y: 450, z:1, scaleX: 1},
-      wallpaper: {image: null, x: 150, y: 350, z:1, scaleX: 1},
+      wallpaper: 'null',
       floor: floor,
       wallItems: {}
     },
@@ -40,6 +40,7 @@ const Bedroom = ({ onSnapshotUpdate}) => {
       'bedroom'
     );
 
+    
   return (
     // Wrap the Screen in ViewShot so that the Where to Next screen can
     //capture images of the players actual bedroom whenever they redecorate it
@@ -61,11 +62,27 @@ const Bedroom = ({ onSnapshotUpdate}) => {
             </View>
           </View>
         )}
+
+
+        {/* WALLPAPER / DEFAULT WALL */}
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          {displayItems.wallpaper === null ? (
+            <Image
+              source={displayItems.wallpaper}
+             style={{
+                  width: "100%",
+                  height: "100%",
+                }}
+              contentFit="cover"
+            />
+          ) : (
+            <View style={styles.wall}>
+              <View style={styles.wallOverlay} />
+            </View>
+          )}
+        </View>
       
-      {/* This makes the left wall darker, so it appears 3D*/}
-      <View style={styles.wall}>
-          <View style={styles.wallOverlay} />
-      </View>
+      
 
       {/* FLOOR */}
       <Pressable disabled={!isEditing} pointerEvents="box-none">
@@ -251,13 +268,8 @@ const styles = StyleSheet.create({
     flex:1
   },
   wall: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: '#d0d6c6',
-    zIndex: -1,
   },
   wallOverlay: {
     width: 205,
