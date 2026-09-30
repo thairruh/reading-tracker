@@ -68,7 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ children }) => {
       {/* currentStreak display */}
       <View className="absolute top-[315px] left-24 flex-row items-center">
         <Image
-            source={require("../assets/images/Star.png")}
+            source={require("../assets/images/Star-8.png")}
             className="w-7 h-7"
             resizeMode="contain"
         />
