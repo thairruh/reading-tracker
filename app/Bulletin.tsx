@@ -2,7 +2,6 @@ import { useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, View, Image, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Animated, PanResponder, ImageSourcePropType } from "react-native";
 import EditBar from '../components/bulletin-edit-bar';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StickyNote } from '@/components/sticky-note';
 import { useNotes } from '@/components/NoteContext';
 import { DragNote } from '@/components/DragNote';
